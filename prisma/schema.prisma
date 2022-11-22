@@ -10,6 +10,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
+enum TicketType {
+  FREE
+  PAID
+  MIX
+}
+
+enum Category {
+  ART
+  BUSSINESS
+  COMMUNITY
+  EDUCATION
+  FASHION
+  FINANCE
+  HEALTH
+  MUSIC
+  SOCIAL
+  TECH
+  OTHER
+}
+
+model Ticket {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  stock       Int     @default(1)
+  description String
+  price       Int     @default(0)
+  Webinar     Webinar @relation(fields: [webinarId], references: [id])
+  webinarId   String  @db.ObjectId
+}
+
+model Webinar {
+  id                 String     @id @default(auto()) @map("_id") @db.ObjectId
+  coverImg           String
+  type               TicketType
+  name               String
+  description        String
+  startDate          DateTime
+  EndDate            DateTime
+  registrationOpen   DateTime   @default(now())
+  registrationClosed DateTime
+  category           Category
+  Tickets            Ticket[]
 }

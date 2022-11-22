@@ -1,6 +1,8 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@faker-js/faker': ^7.6.0
+  '@heroicons/react': ^2.0.13
   '@prisma/client': ^4.6.1
   '@remix-run/dev': ^1.7.6
   '@remix-run/eslint-config': ^1.7.6
@@ -11,8 +13,10 @@ specifiers:
   '@types/react': ^18.0.25
   '@types/react-dom': ^18.0.8
   '@vercel/node': ^2.6.2
+  esbuild-register: ^3.4.1
   eslint: ^8.27.0
   eslint-config-prettier: ^8.5.0
+  install: ^0.13.0
   npm-run-all: ^4.1.5
   prettier: ^2.7.1
   prettier-plugin-tailwindcss: ^0.1.13
@@ -23,6 +27,7 @@ specifiers:
   typescript: ^4.8.4
 
 dependencies:
+  '@heroicons/react': 2.0.13_react@18.2.0
   '@prisma/client': 4.6.1_prisma@4.6.1
   '@remix-run/node': 1.7.6_biqbaboplfbrettd7655fr4n2y
   '@remix-run/react': 1.7.6_biqbaboplfbrettd7655fr4n2y
@@ -32,13 +37,16 @@ dependencies:
   react-dom: 18.2.0_react@18.2.0
 
 devDependencies:
+  '@faker-js/faker': 7.6.0
   '@remix-run/dev': 1.7.6_4vz2e3qrixth2olsykapxulhwu
   '@remix-run/eslint-config': 1.7.6_tty5jzdb2vdusfh2ebxkvntpay
   '@remix-run/serve': 1.7.6_biqbaboplfbrettd7655fr4n2y
   '@types/react': 18.0.25
   '@types/react-dom': 18.0.9
+  esbuild-register: 3.4.1
   eslint: 8.28.0
   eslint-config-prettier: 8.5.0_eslint@8.28.0
+  install: 0.13.0
   npm-run-all: 4.1.5
   prettier: 2.7.1
   prettier-plugin-tailwindcss: 0.1.13_prettier@2.7.1
@@ -1410,9 +1418,22 @@ packages:
       - supports-color
     dev: true
 
+  /@faker-js/faker/7.6.0:
+    resolution: {integrity: sha512-XK6BTq1NDMo9Xqw/YkYyGjSsg44fbNwYRx7QK2CuoQgyy+f1rrTDHoExVM5PsyXCtfl2vs2vVJ0MN0yN6LppRw==}
+    engines: {node: '>=14.0.0', npm: '>=6.0.0'}
+    dev: true
+
   /@gar/promisify/1.1.3:
     resolution: {integrity: sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==}
     dev: true
+
+  /@heroicons/react/2.0.13_react@18.2.0:
+    resolution: {integrity: sha512-iSN5XwmagrnirWlYEWNPdCDj9aRYVD/lnK3JlsC9/+fqGF80k8C7rl+1HCvBX0dBoagKqOFBs6fMhJJ1hOg1EQ==}
+    peerDependencies:
+      react: '>= 16'
+    dependencies:
+      react: 18.2.0
+    dev: false
 
   /@humanwhocodes/config-array/0.11.7:
     resolution: {integrity: sha512-kBbPWzN8oVMLb0hOUYXhmxggL/1cJE6ydvjDIGi9EnAGUyA7cLVKQg+d/Dsm+KZwx2czGHrCmMVLiyg8s5JPKw==}
@@ -3597,6 +3618,16 @@ packages:
     dev: true
     optional: true
 
+  /esbuild-register/3.4.1:
+    resolution: {integrity: sha512-iCgs88/1wA5dIRx4i65eSjbkgrQQQJGpY6Z1eD2XPlzrSjbgNtfkw2/rfSMzJ4dTtlOD8EZTxrIA3fyYp0FsMA==}
+    peerDependencies:
+      esbuild: '>=0.12 <1'
+    dependencies:
+      debug: 4.3.4
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /esbuild-sunos-64/0.14.47:
     resolution: {integrity: sha512-uOeSgLUwukLioAJOiGYm3kNl+1wJjgJA8R671GYgcPgCx7QR73zfvYqXFFcIO93/nBdIbt5hd8RItqbbf3HtAQ==}
     engines: {node: '>=12'}
@@ -4923,6 +4954,11 @@ packages:
       strip-ansi: 6.0.1
       through: 2.3.8
       wrap-ansi: 7.0.0
+    dev: true
+
+  /install/0.13.0:
+    resolution: {integrity: sha512-zDml/jzr2PKU9I8J/xyZBQn8rPCAY//UOYNmR01XwNwyfhEWObo2SWfSl1+0tm1u6PhxLwDnfsT/6jB7OUxqFA==}
+    engines: {node: '>= 0.10'}
     dev: true
 
   /internal-slot/1.0.3:
