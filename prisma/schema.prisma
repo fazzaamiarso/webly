@@ -46,7 +46,7 @@ model Webinar {
   name               String
   description        String
   startDate          DateTime
-  EndDate            DateTime
+  endDate            DateTime
   registrationOpen   DateTime   @default(now())
   registrationClosed DateTime
   category           Category

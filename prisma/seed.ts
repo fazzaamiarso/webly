@@ -9,6 +9,7 @@ const randomCategory = () =>
 const randomType = () => faker.helpers.arrayElement(Object.values(TicketType));
 
 const runSeed = async () => {
+  await prisma.webinar.deleteMany();
   console.log("🌱 Start Seeding!");
 
   console.log("Creating Webinars!");
@@ -19,7 +20,7 @@ const runSeed = async () => {
         name: faker.commerce.productName(),
         description: faker.commerce.productDescription(),
         type: randomType(),
-        EndDate: faker.date.future(),
+        endDate: faker.date.future(),
         startDate: faker.date.future(),
         registrationClosed: faker.date.future(),
         category: randomCategory(),
