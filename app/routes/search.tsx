@@ -1,10 +1,12 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Category } from "@prisma/client";
+import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 import { mongoClient } from "~/lib/mongodb.server";
 
-export const loader = async () => {
+export const loader = async ({ request }: LoaderArgs) => {
+  const query = new URL(request.url).searchParams.get("q") ?? "modern";
   const results = await(await mongoClient)
     .db("webinar-app")
     .collection("Webinar")
@@ -12,7 +14,7 @@ export const loader = async () => {
       {
         $search: {
           text: {
-            query: "mode",
+            query,
             path: {
               wildcard: "*",
             },
@@ -22,6 +24,7 @@ export const loader = async () => {
       },
     ])
     .toArray();
+
   return json(results);
 };
 
@@ -31,6 +34,7 @@ const capitalize = (str: string) => {
 
 export default function Search() {
   const webinars = useLoaderData<typeof loader>();
+
   return (
     <main className="w-11/12 mx-auto">
       <div className="w-full flex items-start py-8 gap-12">
@@ -65,7 +69,7 @@ export default function Search() {
           <ul className="flex items-center gap-8 flex-wrap">
             {webinars.map((w) => {
               return (
-                <li key={w.id} className="w-max">
+                <li key={w.name} className="w-max">
                   <div className="h-40 w-52">
                     <img
                       src={w.coverImg}
