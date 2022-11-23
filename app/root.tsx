@@ -1,5 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
 import {
+  Link,
   Links,
   LiveReload,
   Meta,
@@ -39,12 +40,12 @@ export default function App() {
             />
           </div>
           <div className="ml-auto flex items-center gap-6">
-            <button className="flex items-center ">
+            <Link to="/search" className="flex items-center ">
               <MagnifyingGlassIcon
                 className="h-6 w-6 text-gray-400 hover:text-gray-500"
                 aria-hidden="true"
               />
-            </button>
+            </Link>
             <button className="flex items-center ">
               <ShoppingBagIcon
                 className="h-6 w-6 text-gray-400 hover:text-gray-500"

@@ -1,21 +1,22 @@
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { Category } from "@prisma/client";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import { mongoClient } from "~/lib/mongodb.server";
 
 export const loader = async () => {
-  const results = await (
-    await mongoClient
-  )
+  const results = await(await mongoClient)
     .db("webinar-app")
     .collection("Webinar")
     .aggregate([
       {
         $search: {
           text: {
-            query: "licensed",
+            query: "mode",
             path: {
               wildcard: "*",
             },
+            fuzzy: {},
           },
         },
       },
@@ -24,15 +25,38 @@ export const loader = async () => {
   return json(results);
 };
 
+const capitalize = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
 export default function Search() {
   const webinars = useLoaderData<typeof loader>();
-
   return (
     <main className="w-11/12 mx-auto">
-      <div className="w-full flex items-start py-8">
+      <div className="w-full flex items-start py-8 gap-12">
         {/* FILTER */}
         <section className="basis-[30%]">
-          <h2 className="font-semibold text-lg">Filters</h2>
+          <Form className="w-full">
+            <h2 className="font-semibold text-lg mb-6">Filters</h2>
+            <fieldset className="space-y-4">
+              <div className="w-full flex items-center justify-between">
+                <legend>Categories</legend>
+                <button type="button">
+                  <PlusIcon className="w-5" />
+                </button>
+              </div>
+              <div className="space-y-1">
+                {Object.keys(Category).map((c) => {
+                  return (
+                    <label key={c} className="flex items-center gap-4 text-sm">
+                      <input type="checkbox" name="category" />
+                      <span>{capitalize(c)}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
+          </Form>
         </section>
         {/* FILTER END */}
         {/* PRODUCTS */}

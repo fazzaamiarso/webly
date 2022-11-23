@@ -10,6 +10,7 @@ specifiers:
   '@remix-run/react': ^1.7.6
   '@remix-run/serve': ^1.7.6
   '@remix-run/vercel': ^1.7.6
+  '@tailwindcss/forms': ^0.5.3
   '@types/react': ^18.0.25
   '@types/react-dom': ^18.0.8
   '@vercel/node': ^2.6.2
@@ -43,6 +44,7 @@ devDependencies:
   '@remix-run/dev': 1.7.6_4vz2e3qrixth2olsykapxulhwu
   '@remix-run/eslint-config': 1.7.6_tty5jzdb2vdusfh2ebxkvntpay
   '@remix-run/serve': 1.7.6_biqbaboplfbrettd7655fr4n2y
+  '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.4
   '@types/react': 18.0.25
   '@types/react-dom': 18.0.9
   esbuild-register: 3.4.1
@@ -2615,6 +2617,15 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       defer-to-connect: 2.0.1
+    dev: true
+
+  /@tailwindcss/forms/0.5.3_tailwindcss@3.2.4:
+    resolution: {integrity: sha512-y5mb86JUoiUgBjY/o6FJSFZSEttfb3Q5gllE4xoKjAAD+vBrnIhE4dViwUuow3va8mpH4s9jyUbUbrRGoRdc2Q==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || >= 3.0.0-alpha.1'
+    dependencies:
+      mini-svg-data-uri: 1.4.4
+      tailwindcss: 3.2.4
     dev: true
 
   /@testing-library/dom/8.19.0:
@@ -6934,6 +6945,11 @@ packages:
   /mimic-response/3.1.0:
     resolution: {integrity: sha512-z0yWI+4FDrrweS8Zmt4Ej5HdJmky15+L2e6Wgn3+iK5fWzb6T3fhNFq2+MeTRb064c6Wr4N/wv0DzQTjNzHNGQ==}
     engines: {node: '>=10'}
+    dev: true
+
+  /mini-svg-data-uri/1.4.4:
+    resolution: {integrity: sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==}
+    hasBin: true
     dev: true
 
   /minimatch/3.1.2:
