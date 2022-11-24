@@ -16,33 +16,39 @@ export const loader = async ({ request }: LoaderArgs) => {
   const query = new URL(request.url).searchParams.get("q");
   const categories = new URL(request.url).searchParams.getAll("category");
 
-  if (!query) return json(await prisma.webinar.findMany());
-
   let pipeline: any = [
     {
       $search: {
-        compound: {
-          must: [
-            {
-              text: {
-                query,
-                path: {
-                  wildcard: "*",
-                },
-                fuzzy: {},
-              },
-            },
-          ],
+        compound: {},
+      },
+    },
+    {
+      $lookup: {
+        from: "Ticket",
+        localField: "_id",
+        foreignField: "webinarId",
+        as: "price",
+      },
+    },
+    {
+      $addFields: {
+        id: "$_id",
+        calc: {
+          $reduce: {
+            input: "$price.price",
+            initialValue: 0,
+            in: { $add: ["$$value", "$$this"] },
+          },
         },
       },
     },
     {
-      $project: { _id: false },
-    },
-    {
-      $addFields: { id: "$_id" },
+      $project: { _id: false, price: false },
     },
   ];
+
+  if (!query?.length && !categories.length)
+    return json(await prisma.webinar.findMany());
 
   if (categories.length)
     pipeline[0].$search.compound.filter = [
@@ -54,7 +60,20 @@ export const loader = async ({ request }: LoaderArgs) => {
       },
     ];
 
-  const results = await(await mongoClient)
+  if (query?.length)
+    pipeline[0].$search.compound.must = [
+      {
+        text: {
+          query,
+          path: {
+            wildcard: "*",
+          },
+          fuzzy: {},
+        },
+      },
+    ];
+
+  const results = await (await mongoClient)
     .db("webinar-app")
     .collection("Webinar")
     .aggregate(pipeline)
@@ -136,7 +155,7 @@ export default function Search() {
                   </div>
                   <div className="flex w-full justify-between gap-8">
                     <p>{w.name}</p>
-                    <span className="">$20</span>
+                    <span className="">${w.calc}</span>
                   </div>
                 </li>
               );

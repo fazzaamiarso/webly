@@ -1,6 +1,7 @@
 import type { MetaFunction } from "@remix-run/node";
 import {
   Form,
+  Link,
   Links,
   LiveReload,
   Meta,
@@ -32,13 +33,13 @@ export default function App() {
       </head>
       <body>
         <header className="mx-auto w-11/12 py-4 flex items-center border-b-[1px]">
-          <div className="">
+          <Link to="/" className="">
             <img
               src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
               alt=""
               className="h-8 w-auto"
             />
-          </div>
+          </Link>
           <div className="ml-auto flex items-center gap-6">
             <Form action="/search" method="get" className="w-full flex gap-2">
               <label htmlFor="search" className="sr-only">
