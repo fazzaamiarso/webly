@@ -14,7 +14,7 @@ const runSeed = async () => {
 
   console.log("Creating Webinars!");
   await prisma.webinar.createMany({
-    data: faker.datatype.array(5).map((_) => {
+    data: faker.datatype.array(15).map((_) => {
       return {
         coverImg: faker.image.food(),
         name: faker.commerce.productName(),
