@@ -18,27 +18,34 @@ export const loader = async ({ request }: LoaderArgs) => {
 
   if (!query) return json(await prisma.webinar.findMany());
 
-  let pipeline = {
-    $search: {
-      compound: {
-        must: [
-          {
-            text: {
-              query,
-              path: {
-                wildcard: "*",
+  let pipeline: any = [
+    {
+      $search: {
+        compound: {
+          must: [
+            {
+              text: {
+                query,
+                path: {
+                  wildcard: "*",
+                },
+                fuzzy: {},
               },
-              fuzzy: {},
             },
-          },
-        ],
+          ],
+        },
       },
     },
-  };
+    {
+      $project: { _id: false },
+    },
+    {
+      $addFields: { id: "$_id" },
+    },
+  ];
 
-  // TODO: Fix this whole conditional pipeline thingy
-  if (categories.length) {
-    pipeline.$search.compound.filter = [
+  if (categories.length)
+    pipeline[0].$search.compound.filter = [
       {
         text: {
           query: categories,
@@ -46,12 +53,11 @@ export const loader = async ({ request }: LoaderArgs) => {
         },
       },
     ];
-  }
 
-  const results = await (await mongoClient)
+  const results = await(await mongoClient)
     .db("webinar-app")
     .collection("Webinar")
-    .aggregate([pipeline])
+    .aggregate(pipeline)
     .toArray();
 
   return json(results);
@@ -120,7 +126,7 @@ export default function Search() {
           <ul className="flex items-center gap-8 flex-wrap">
             {webinars.map((w) => {
               return (
-                <li key={w.name} className="w-max">
+                <li key={w.id} className="w-max">
                   <div className="h-40 w-52">
                     <img
                       src={w.coverImg}

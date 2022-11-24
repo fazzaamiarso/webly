@@ -1,4 +1,5 @@
-import { Category, Prisma, PrismaClient, TicketType } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import { Category, PrismaClient, TicketType } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 
 const prisma = new PrismaClient();
