@@ -12,8 +12,19 @@ import { useState } from "react";
 import { mongoClient } from "~/lib/mongodb.server";
 import { prisma } from "~/lib/prisma.server";
 
+
+const sorter = [
+  { name: "Most Relevant", value: "MOST_RELEVANT" },
+  { name: "Newest", value: "NEWEST" },
+  { name: "Trending", value: "TRENDING" },
+] as const;
+
 export const loader = async ({ request }: LoaderArgs) => {
   const query = new URL(request.url).searchParams.get("q");
+  const sort: typeof sorter[number]["value"] = (new URL(
+    request.url
+  ).searchParams.get("sort") ??
+    "MOST_RELEVANT") as typeof sorter[number]["value"];
   const categories = new URL(request.url).searchParams.getAll("category");
 
   let pipeline: any = [
@@ -48,7 +59,16 @@ export const loader = async ({ request }: LoaderArgs) => {
   ];
 
   if (!query?.length && !categories.length)
-    return json(await prisma.webinar.findMany());
+    return json(
+      await prisma.webinar.findMany({
+        include: { Tickets: { select: { price: true } } },
+      })
+    );
+
+  //TODO: implement sort
+  if (sort === "NEWEST") {
+    pipeline.push({ $sort: { registrationOpen: -1 } });
+  }
 
   if (categories.length)
     pipeline[0].$search.compound.filter = [
@@ -156,9 +176,28 @@ export default function Search() {
         {/* FILTER END */}
         {/* PRODUCTS */}
         <section className="basis-full">
-          <div className="flex items-center gap-3">
-            <h2 className="font-semibold text-lg">Webinars</h2>
-            <p className="text-sm">{webinars.length} results</p>
+          <div className="flex w-full justify-between">
+            <div className="flex items-center gap-3">
+              <h2 className="font-semibold text-lg">Webinars</h2>
+              <p className="text-sm">{webinars.length} results</p>
+            </div>
+            <select
+              name="sort"
+              className="text-sm border-none font-semibold"
+              onChange={(e) => {
+                const data = new URLSearchParams([
+                  ...Array.from(searchParams.entries()),
+                  ...Object.entries({ sort: e.target.value }),
+                ]);
+                submit(data);
+              }}
+            >
+              {sorter.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
           </div>
           <ul className="flex items-center gap-8 flex-wrap">
             {webinars.map((w) => {
@@ -173,7 +212,15 @@ export default function Search() {
                   </div>
                   <div className="flex w-full justify-between gap-8">
                     <p>{w.name}</p>
-                    <span className="">${w.calc}</span>
+                    <span className="">
+                      $
+                      {w.calc ??
+                        w.Tickets.reduce(
+                          (acc: number, curr: { price: number }) =>
+                            acc + curr.price,
+                          0
+                        )}
+                    </span>
                   </div>
                 </li>
               );

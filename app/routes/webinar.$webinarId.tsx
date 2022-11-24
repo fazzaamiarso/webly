@@ -28,13 +28,13 @@ export default function WebinarDetails() {
   const fetcher = useFetcher();
 
   return (
-    <main className="w-11/12 mx-auto space-y-12">
-      <section className="">
+    <main className="w-11/12 mx-auto space-y-12 md:grid md:grid-cols-2 md:gap-8 pt-8">
+      <section className="space-y-4">
         <h2 className="font-bold mb-2 text-3xl">{webinar?.name}</h2>
         <p>{webinar?.description}</p>
         <p>Meeting via Zoom</p>
 
-        <fetcher.Form method="post">
+        <fetcher.Form method="post" className="space-y-4">
           <RadioGroup name="ticket-id" defaultValue={webinar?.Tickets[0].id}>
             <RadioGroup.Label className="font-semibold">
               Tickets
@@ -46,13 +46,13 @@ export default function WebinarDetails() {
                   value={t.id}
                   className={({ checked }) =>
                     clsx(
-                      "p-4 rounded-md ring-1",
+                      "p-4 rounded-md ring-1 w-full space-y-2",
                       checked ? "ring-purple-600" : "ring-black"
                     )
                   }
                 >
                   <div className="font-semibold text-lg">${t.price}</div>
-                  <p>{t.description}</p>
+                  <p className="text-sm">{t.description}</p>
                   <div className="text-sm">{t.stock} left in stock</div>
                 </RadioGroup.Option>
               );
