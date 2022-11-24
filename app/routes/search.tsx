@@ -122,16 +122,34 @@ export default function Search() {
                   />
                 </button>
               </div>
-              <div className="space-y-1">
-                {Object.keys(Category).map((c) => {
-                  return (
-                    <label key={c} className="flex items-center gap-4 text-sm">
-                      <input type="checkbox" name="category" id={c} value={c} />
-                      <span>{capitalize(c)}</span>
-                    </label>
-                  );
-                })}
-              </div>
+              {!isCategoryOpen && (
+                <div className="text-sm">
+                  {searchParams.getAll("category").map(capitalize).join(", ")}
+                </div>
+              )}
+              {isCategoryOpen && (
+                <div className="space-y-1">
+                  {Object.keys(Category).map((c) => {
+                    return (
+                      <label
+                        key={c}
+                        className="flex items-center gap-4 text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          name="category"
+                          id={c}
+                          value={c}
+                          defaultChecked={searchParams
+                            .getAll("category")
+                            .includes(c)}
+                        />
+                        <span>{capitalize(c)}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
             </fieldset>
           </Form>
         </section>
