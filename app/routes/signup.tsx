@@ -3,7 +3,8 @@ import { Form, Link } from "@remix-run/react";
 import { authenticator } from "~/utils/auth.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
-  await authenticator.isAuthenticated(request, { successRedirect: "/" });
+  await authenticator.isAuthenticated(request, { successRedirect: "/shop" });
+  return null;
 };
 
 export const action = async ({ request }: ActionArgs) => {
@@ -19,12 +20,15 @@ export default function Signup() {
         <div>
           <h1 className="font-bold text-2xl">Sign up to Webly</h1>
           <p>
-            or signin <Link to="/signin">here</Link>
+            or signin{" "}
+            <Link to="/signin" className="text-blue-500">
+              here
+            </Link>
           </p>
         </div>
 
-        <Form className="space-y-4">
-          <input type="text" hidden name="auth-type" value="signup" />
+        <Form className="space-y-4" method="post">
+          <input type="text" hidden name="auth-type" defaultValue="signup" />
           <div>
             <label htmlFor="email">Email</label>
             <input type="text" id="email" name="email" />
@@ -34,7 +38,7 @@ export default function Signup() {
             <input type="password" id="password" name="password" />
           </div>
           <button className="w-full bg-black text-white p-2 rounded-md">
-            Sign in
+            Sign up
           </button>
         </Form>
       </div>
