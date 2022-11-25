@@ -37,6 +37,8 @@ model Ticket {
   price       Int     @default(0)
   Webinar     Webinar @relation(fields: [webinarId], references: [id])
   webinarId   String  @db.ObjectId
+  User        User    @relation(fields: [userId], references: [id])
+  userId      String  @db.ObjectId
 }
 
 model Webinar {
@@ -51,4 +53,18 @@ model Webinar {
   registrationClosed DateTime
   category           Category
   Tickets            Ticket[]
+}
+
+model User {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  email    String    @unique
+  cart     Ticket[]
+  password Password?
+}
+
+model Password {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  hash   String
+  User   User   @relation(fields: [userId], references: [id])
+  userId String @unique @db.ObjectId
 }
