@@ -31,14 +31,14 @@ enum Category {
 }
 
 model Ticket {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  stock       Int     @default(1)
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  stock       Int      @default(1)
   description String
-  price       Int     @default(0)
-  Webinar     Webinar @relation(fields: [webinarId], references: [id])
-  webinarId   String  @db.ObjectId
-  User        User    @relation(fields: [userId], references: [id])
-  userId      String  @db.ObjectId
+  price       Int      @default(0)
+  Webinar     Webinar  @relation(fields: [webinarId], references: [id])
+  webinarId   String   @db.ObjectId
+  User        User[]   @relation(fields: [userIDs], references: [id])
+  userIDs     String[] @db.ObjectId
 }
 
 model Webinar {
@@ -56,10 +56,11 @@ model Webinar {
 }
 
 model User {
-  id       String    @id @default(auto()) @map("_id") @db.ObjectId
-  email    String    @unique
-  cart     Ticket[]
-  password Password?
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
+  cart      Ticket[]  @relation(fields: [ticketIDs], references: [id])
+  ticketIDs String[]  @db.ObjectId
+  password  Password?
 }
 
 model Password {
