@@ -4,6 +4,7 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   Form,
+  Link,
   useLoaderData,
   useSearchParams,
   useSubmit,
@@ -11,7 +12,6 @@ import {
 import { useState } from "react";
 import { mongoClient } from "~/lib/mongodb.server";
 import { prisma } from "~/lib/prisma.server";
-
 
 const sorter = [
   { name: "Most Relevant", value: "MOST_RELEVANT" },
@@ -85,9 +85,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       {
         text: {
           query,
-          path: {
-            wildcard: "*",
-          },
+          path: "name",
           fuzzy: {},
         },
       },
@@ -199,29 +197,36 @@ export default function Search() {
               ))}
             </select>
           </div>
-          <ul className="flex items-center gap-8 flex-wrap">
+          <ul className="w-full flex items-center justify-between gap-8 flex-wrap">
             {webinars.map((w) => {
               return (
-                <li key={w.id} className="w-max">
-                  <div className="h-40 w-52">
-                    <img
-                      src={w.coverImg}
-                      alt=""
-                      className="rounded-md bg-cover bg-center"
-                    />
-                  </div>
-                  <div className="flex w-full justify-between gap-8">
-                    <p>{w.name}</p>
-                    <span className="">
-                      $
-                      {w.calc ??
-                        w.Tickets.reduce(
-                          (acc: number, curr: { price: number }) =>
-                            acc + curr.price,
-                          0
-                        )}
-                    </span>
-                  </div>
+                <li key={w.id} className="basis-[22%]">
+                  <Link to={`/webinar/${w.id}`}>
+                    <div className="h-40 w-52">
+                      <img
+                        src={w.coverImg}
+                        alt=""
+                        className="rounded-md bg-cover bg-center"
+                      />
+                    </div>
+                    <div className="flex w-full justify-between gap-8">
+                      <div>
+                        <p className="line-clamp-1 font-semibold text-sm">
+                          {w.name}
+                        </p>
+                        <p className="text-sm">Webinar Host</p>
+                      </div>
+                      <span className="">
+                        $
+                        {w.calc ??
+                          w.Tickets.reduce(
+                            (acc: number, curr: { price: number }) =>
+                              acc + curr.price,
+                            0
+                          )}
+                      </span>
+                    </div>
+                  </Link>
                 </li>
               );
             })}

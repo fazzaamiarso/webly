@@ -8,6 +8,8 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useFetcher,
+  useSubmit,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import styles from "./tailwind.css";
@@ -15,6 +17,8 @@ import {
   MagnifyingGlassIcon,
   ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
+import { Combobox } from "@headlessui/react";
+import type { loader } from "./routes/search";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: styles }];
 
@@ -25,6 +29,8 @@ export const meta: MetaFunction = () => ({
 });
 
 export default function App() {
+  const submit = useSubmit();
+  const webinars = useFetcher<typeof loader>();
   return (
     <html lang="en">
       <head>
@@ -32,7 +38,7 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <header className="mx-auto w-11/12 py-4 flex items-center border-b-[1px]">
+        <header className="mx-auto w-11/12 py-4 flex items-center border-b-[1px] gap-8">
           <Link to="/" className="">
             <img
               src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
@@ -40,24 +46,49 @@ export default function App() {
               className="h-8 w-auto"
             />
           </Link>
-          <div className="ml-auto flex items-center gap-6">
-            <Form action="/search" method="get" className="w-full flex gap-2">
-              <label htmlFor="search" className="sr-only">
-                Search Webinars
-              </label>
-              <input
-                type="search"
+          <Form action="/search" method="get" className="w-full flex gap-2">
+            <Combobox
+              nullable
+              as="div"
+              className="w-full relative"
+              onChange={(e) => {
+                if (!e) return;
+                submit(new URLSearchParams({ q: e as string }), {
+                  action: "/search",
+                });
+              }}
+            >
+              <Combobox.Input
                 name="q"
-                id="search"
                 placeholder="Search webinars"
+                autoComplete="off"
+                className="w-full relative"
+                onChange={(e) => {
+                  if (e.target.value === "") return;
+                  webinars.load(`/api/autocomplete?q=${e.target.value}`);
+                }}
               />
-              <button className="flex items-center ">
-                <MagnifyingGlassIcon
-                  className="h-6 w-6 text-gray-400 hover:text-gray-500"
-                  aria-hidden="true"
-                />
-              </button>
-            </Form>
+              <Combobox.Options className="absolute bottom-0 left-0 w-full translate-y-full bg-white shadow-lg p-4 space-y-2">
+                {webinars.data?.length === 0 && webinars.type === "done" && (
+                  <p>No Webinars Found</p>
+                )}
+                {webinars.data?.map((w) => {
+                  return (
+                    <Combobox.Option key={w._id} value={w.name}>
+                      {w.name}
+                    </Combobox.Option>
+                  );
+                })}
+              </Combobox.Options>
+            </Combobox>
+            <button type="submit" className="flex items-center">
+              <MagnifyingGlassIcon
+                className="h-6 w-6 text-gray-400 hover:text-gray-500"
+                aria-hidden="true"
+              />
+            </button>
+          </Form>
+          <div className="ml-auto flex items-center gap-6">
             <button className="flex items-center ">
               <ShoppingBagIcon
                 className="h-6 w-6 text-gray-400 hover:text-gray-500"
