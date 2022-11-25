@@ -5,6 +5,7 @@ import { useFetcher, useLoaderData } from "@remix-run/react";
 import clsx from "clsx";
 import invariant from "tiny-invariant";
 import { prisma } from "~/lib/prisma.server";
+import { authenticator } from "~/utils/auth.server";
 
 export const loader = async ({ params }: LoaderArgs) => {
   invariant(params.webinarId, `Expected ${params.webinarId}!`);
@@ -17,8 +18,16 @@ export const loader = async ({ params }: LoaderArgs) => {
 };
 
 export const action = async ({ request }: ActionArgs) => {
+  const user = await authenticator.isAuthenticated(request);
   const formData = await request.formData();
   const ticketId = formData.get("ticket-id");
+
+  invariant(typeof ticketId === "string", "ticketId must be a string");
+
+  await prisma.user.update({
+    where: { id: user?.userId },
+    data: { cart: { push: ticketId } },
+  });
 
   return json(null);
 };
@@ -58,7 +67,10 @@ export default function WebinarDetails() {
               );
             })}
           </RadioGroup>
-          <button className="w-full bg-black text-white py-2 rounded-md">
+          <button
+            className="w-full bg-black text-white py-2 rounded-md"
+            disabled={fetcher.state === "submitting"}
+          >
             Add to cart
           </button>
         </fetcher.Form>

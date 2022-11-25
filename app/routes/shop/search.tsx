@@ -202,7 +202,7 @@ export default function Search() {
             {webinars.map((w) => {
               return (
                 <li key={w.id} className="basis-[22%]">
-                  <Link to={`/webinar/${w.id}`}>
+                  <Link to={`/shop/webinar/${w.id}`}>
                     <div className="h-40 w-52">
                       <img
                         src={w.coverImg}

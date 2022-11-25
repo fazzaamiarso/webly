@@ -3,6 +3,7 @@ import {
   MagnifyingGlassIcon,
   ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
+import { UserIcon } from "@heroicons/react/24/solid";
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
@@ -13,12 +14,21 @@ import {
   Outlet,
   useLoaderData,
 } from "@remix-run/react";
+import { prisma } from "~/lib/prisma.server";
 import type { loader as SearchLoader } from "~/routes/shop/search";
 import { authenticator } from "~/utils/auth.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const user = await authenticator.isAuthenticated(request);
-  return json({ email: user?.email ?? null });
+  const savedUser = await authenticator.isAuthenticated(request);
+  const user = await prisma.user.findFirst({
+    where: { id: savedUser?.userId },
+    select: { cart: true },
+  });
+
+  return json({
+    email: savedUser?.email ?? null,
+    cartCount: user?.cart.length,
+  });
 };
 
 export default function ShopLayout() {
@@ -32,7 +42,9 @@ export default function ShopLayout() {
           <div className="w-11/12 mx-auto flex items-center">
             {user.email ? (
               <div className="ml-auto space-x-8 flex items-center">
-                <p className="text-white text-sm">Hello, {user.email}</p>
+                <p className="text-white text-sm flex items-center gap-2">
+                  <UserIcon className="h-3" /> <span>{user.email}</span>
+                </p>
                 <Form action="/api/logout" method="post">
                   <button className="text-white text-sm">Logout</button>
                 </Form>
@@ -104,16 +116,16 @@ export default function ShopLayout() {
             </button>
           </Form>
           <div className="ml-auto flex items-center gap-6">
-            <button className="flex items-center ">
+            <Link to="/shop/cart" className="flex items-center ">
               <ShoppingBagIcon
                 className="h-6 w-6 text-gray-400 hover:text-gray-500"
                 aria-hidden="true"
               />
               <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                0
+                {user.cartCount}
               </span>
               <span className="sr-only">items in cart, view bag</span>
-            </button>
+            </Link>
           </div>
         </div>
       </header>
