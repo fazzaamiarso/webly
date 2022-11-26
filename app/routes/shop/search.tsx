@@ -10,6 +10,7 @@ import {
   useSubmit,
 } from "@remix-run/react";
 import { useState } from "react";
+import { WebinarItem } from "~/components/webinar-item";
 import { mongoClient } from "~/lib/mongodb.server";
 import { prisma } from "~/lib/prisma.server";
 
@@ -120,7 +121,7 @@ export default function Search() {
     <main className="w-11/12 mx-auto">
       <div className="w-full flex items-start py-8 gap-12">
         {/* FILTER */}
-        <section className="basis-[30%]">
+        <section className="basis-[20%]">
           <Form className="w-full" onChange={(e) => submit(e.currentTarget)}>
             <h2 className="font-semibold text-lg mb-6">Filters</h2>
             <input
@@ -202,39 +203,16 @@ export default function Search() {
               ))}
             </select>
           </div>
-          <ul className="w-full flex items-center justify-between gap-8 flex-wrap pt-4">
-            {webinars.map((w) => {
-              return (
-                <li key={w.id} className="basis-[22%]">
-                  <Link to={`/shop/webinar/${w.id}`}>
-                    <div className="h-40 w-52">
-                      <img
-                        src={w.coverImg}
-                        alt=""
-                        className="rounded-md bg-cover bg-center"
-                      />
-                    </div>
-                    <div className="flex w-full justify-between gap-8">
-                      <div>
-                        <p className="line-clamp-1 font-semibold text-sm">
-                          {w.name}
-                        </p>
-                        <p className="text-sm">Webinar Host</p>
-                      </div>
-                      <span className="">
-                        $
-                        {w.calc ??
-                          w.Tickets.reduce(
-                            (acc: number, curr: { price: number }) =>
-                              acc + curr.price,
-                            0
-                          )}
-                      </span>
-                    </div>
-                  </Link>
-                </li>
-              );
-            })}
+          <ul className="w-full pt-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-6 gap-y-8">
+            {webinars.map((w) => (
+              <WebinarItem
+                key={w.id}
+                id={w.id}
+                cover={w.coverImg}
+                name={w.name}
+                tickets={w.Tickets}
+              />
+            ))}
           </ul>
         </section>
         {/* PRODUCTS END */}

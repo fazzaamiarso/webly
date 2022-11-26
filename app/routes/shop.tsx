@@ -93,9 +93,9 @@ export default function ShopLayout() {
             >
               <Combobox.Input
                 name="q"
-                placeholder="Search webinars"
+                placeholder="Search webinars and hosts"
                 autoComplete="off"
-                className="w-full relative"
+                className="w-full relative bg-[#f3f3f6] border-none py-3 rounded-sm"
                 onChange={(e) => {
                   if (e.target.value === "") return;
                   webinars.load(`/api/autocomplete?q=${e.target.value}`);
