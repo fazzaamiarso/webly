@@ -5,9 +5,7 @@ import { mongoClient } from "~/lib/mongodb.server";
 export const loader = async ({ request }: LoaderArgs) => {
   const query = new URL(request.url).searchParams.get("q");
 
-  const results = await (
-    await mongoClient
-  )
+  const results = await(await mongoClient)
     .db("webinar-app")
     .collection("Webinar")
     .aggregate([
@@ -23,10 +21,16 @@ export const loader = async ({ request }: LoaderArgs) => {
         },
       },
       { $limit: 5 },
-      { $project: { _id: 1, name: 1 } },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          score: { $meta: "searchScore" },
+        },
+      },
     ])
     .toArray();
 
-  console.log(results);
+  console.log(results.map((r) => r.highlights.texts));
   return json(results);
 };

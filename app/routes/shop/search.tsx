@@ -61,7 +61,11 @@ export const loader = async ({ request }: LoaderArgs) => {
   if (!query?.length)
     return json(
       await prisma.webinar.findMany({
-        where: { category: { in: categories as Category[] } },
+        where: {
+          category: {
+            in: categories.length ? (categories as Category[]) : undefined,
+          },
+        },
         include: { Tickets: { select: { price: true } } },
       })
     );

@@ -108,7 +108,7 @@ export default function ShopLayout() {
                 {webinars.data?.map((w) => {
                   return (
                     <Combobox.Option key={w._id} value={w.name}>
-                      {w.name}
+                      {w.name} {w.score}
                     </Combobox.Option>
                   );
                 })}

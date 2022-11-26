@@ -64,10 +64,13 @@ export default function Cart() {
       <section className="w-full space-y-8">
         <h2 className="font-bold mb-8 text-3xl">Shopping Cart</h2>
         {cart && cart.length > 0 ? (
-          <ul className="flex items-center gap-8 flex-wrap">
+          <ul className="flex items-center  flex-wrap w-full">
             {cart.map((c) => {
               return (
-                <li key={c.id} className="w-full p-4 flex items-start gap-2">
+                <li
+                  key={c.id}
+                  className="w-full p-4 flex items-start gap-2 border-t-[1px] border-y-black last:border-b-[1px]"
+                >
                   <div className="h-16 aspect-square rounded-sm overflow-hidden">
                     <img
                       src={c.Ticket.Webinar.coverImg}
@@ -75,16 +78,18 @@ export default function Cart() {
                       className="object-cover object-center h-full"
                     />
                   </div>
-                  <div>
-                    <h3>{c.Ticket.Webinar.name}</h3>
-                    <p>Webinar Host</p>
-                  </div>
-                  <div>
-                    <div className="ml-auto">
-                      <span>{c.quantity} x </span>
-                      <span className="font-semibold">${c.Ticket.price}</span>
+                  <div className="flex flex-col w-full">
+                    <div className="flex">
+                      <div>
+                        <h3>{c.Ticket.Webinar.name}</h3>
+                        <p>Webinar Host</p>
+                      </div>
+                      <div className="ml-auto">
+                        <span>{c.quantity} x </span>
+                        <span className="font-semibold">${c.Ticket.price}</span>
+                      </div>
                     </div>
-                    <Form method="post">
+                    <Form method="post" className="ml-auto">
                       <input
                         key={c.quantity}
                         type="number"
@@ -95,7 +100,7 @@ export default function Cart() {
                       <button
                         name="ticket-id"
                         value={c.ticketId}
-                        className="text-blue-500"
+                        className="text-blue-500 text-sm"
                       >
                         Remove
                       </button>
@@ -108,14 +113,24 @@ export default function Cart() {
         ) : (
           <p>Your cart are empty!</p>
         )}
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-8">
+          <div className="w-full flex items-center">
+            <p className="text-lg">Subtotal</p>
+            <div className="ml-auto text-lg">
+              $
+              {cart.reduce(
+                (acc, curr) => acc + curr.quantity * curr.Ticket.price,
+                0
+              )}
+            </div>
+          </div>
           <button className="w-full bg-black text-white p-2 rounded-md">
             Checkout
           </button>
-          <p>
-            continue to checkout or{" "}
-            <Link to="/shop" className="text-blue-500">
-              search more webinar
+          <p className="text-center">
+            or{" "}
+            <Link to="/shop" className="text-blue-500 text-sm">
+              Continue Browsing →
             </Link>
           </p>
         </div>

@@ -15,27 +15,39 @@ export const action = async ({ request }: ActionArgs) => {
 
 export default function Signup() {
   return (
-    <main className="w-11/12 mx-auto space-y-12">
-      <div>
-        <div>
-          <h1 className="font-bold text-2xl">Sign up to Webly</h1>
+    <main className="w-screen min-h-screen flex items-center justify-center">
+      <div className="max-w-md w-full mx-auto rounded-md  space-y-8">
+        <div className="text-center">
+          <h2 className="font-bold text-4xl">Sign up to Webly</h2>
           <p>
-            or signin{" "}
+            or{" "}
             <Link to="/signin" className="text-blue-500">
-              here
+              sign in here
             </Link>
           </p>
         </div>
-
-        <Form className="space-y-4" method="post">
+        <Form
+          method="post"
+          className="space-y-6 ring-1 p-8 rounded-md ring-black w-full"
+        >
           <input type="text" hidden name="auth-type" defaultValue="signup" />
-          <div>
-            <label htmlFor="email">Email</label>
-            <input type="text" id="email" name="email" />
+          <div className="">
+            <label htmlFor="email">Email address</label>
+            <input
+              type="text"
+              id="email"
+              name="email"
+              className="w-full block rounded-md"
+            />
           </div>
-          <div>
+          <div className="">
             <label htmlFor="password">Password</label>
-            <input type="password" id="password" name="password" />
+            <input
+              type="password"
+              id="password"
+              name="password"
+              className="w-full block rounded-md"
+            />
           </div>
           <button className="w-full bg-black text-white p-2 rounded-md">
             Sign up
