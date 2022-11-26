@@ -11,7 +11,6 @@ import {
 import { useState } from "react";
 import { WebinarItem } from "~/components/webinar-item";
 import { mongoClient } from "~/lib/mongodb.server";
-import { prisma } from "~/lib/prisma.server";
 
 const sorter = [
   { name: "Most Relevant", value: "MOST_RELEVANT" },
@@ -29,63 +28,22 @@ export const loader = async ({ request }: LoaderArgs) => {
 
   let pipeline: any = [
     {
-      $search: {
-        compound: {},
-      },
-    },
-    {
       $lookup: {
         from: "Ticket",
         localField: "_id",
         foreignField: "webinarId",
-        as: "price",
+        as: "tickets",
       },
-    },
-    {
-      $addFields: {
-        id: "$_id",
-        calc: {
-          $reduce: {
-            input: "$price.price",
-            initialValue: 0,
-            in: { $add: ["$$value", "$$this"] },
-          },
-        },
-      },
-    },
-    {
-      $project: { _id: false, price: false },
     },
   ];
 
-  if (!query?.length)
-    return json(
-      await prisma.webinar.findMany({
-        where: {
-          category: {
-            in: categories.length ? (categories as Category[]) : undefined,
-          },
-        },
-        include: { Tickets: { select: { price: true } } },
-      })
-    );
-
   //TODO: implement sort
   if (sort === "NEWEST") {
-    pipeline.push({ $sort: { registrationOpen: -1 } });
+    pipeline.push({ $sort: { startDate: 1 } });
   }
 
-  if (categories.length)
-    pipeline[0].$search.compound.filter = [
-      {
-        text: {
-          query: categories,
-          path: "category",
-        },
-      },
-    ];
-
-  if (query?.length)
+  if (query?.length) {
+    pipeline.unshift({ $search: { compound: {} } });
     pipeline[0].$search.compound.must = [
       {
         text: {
@@ -95,8 +53,21 @@ export const loader = async ({ request }: LoaderArgs) => {
         },
       },
     ];
+  }
 
-  const results = await (await mongoClient)
+  if (categories.length) {
+    if (!query?.length) pipeline.unshift({ $search: { compound: {} } });
+    pipeline[0].$search.compound.filter = [
+      {
+        text: {
+          query: categories,
+          path: "category",
+        },
+      },
+    ];
+  }
+
+  const results = await(await mongoClient)
     .db("webinar-app")
     .collection("Webinar")
     .aggregate(pipeline)
@@ -163,14 +134,22 @@ export default function Search() {
                           name="category"
                           id={c}
                           value={c}
-                          defaultChecked={searchParams
-                            .getAll("category")
-                            .includes(c)}
+                          checked={searchParams.getAll("category").includes(c)}
                         />
                         <span>{capitalize(c)}</span>
                       </label>
                     );
                   })}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      searchParams.delete("category");
+                      submit(searchParams);
+                    }}
+                    className="text-sm text-blue-500"
+                  >
+                    Reset
+                  </button>
                 </div>
               )}
             </fieldset>
@@ -185,9 +164,11 @@ export default function Search() {
               <p className="text-sm">{webinars.length} results</p>
             </div>
             <select
+              value={searchParams.get("sort") ?? "MOST_RELEVANT"}
               name="sort"
               className="text-sm border-none font-semibold"
               onChange={(e) => {
+                searchParams.delete("sort");
                 const data = new URLSearchParams([
                   ...Array.from(searchParams.entries()),
                   ...Object.entries({ sort: e.target.value }),
@@ -205,12 +186,12 @@ export default function Search() {
           <ul className="w-full pt-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-6 gap-y-8">
             {webinars.map((w) => (
               <WebinarItem
-                key={w.id}
-                id={w.id}
+                key={w._id}
+                id={w._id}
                 cover={w.coverImg}
                 name={w.name}
                 startDate={w.startDate}
-                tickets={w.Tickets}
+                tickets={w.tickets}
               />
             ))}
           </ul>

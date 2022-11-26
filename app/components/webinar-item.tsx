@@ -17,7 +17,7 @@ export const WebinarItem = ({
   startDate,
 }: WebinarItemsProps) => {
   const priceText =
-    tickets.length > 1 ? `from $${tickets[0]}` : `$${tickets[0].price}`;
+    tickets?.length > 1 ? `from $${tickets[0]}` : `$${tickets[0].price}`;
   return (
     <li key={id} className="w-full">
       <Link to={`/shop/webinar/${id}`} className="space-y-2 block w-full">

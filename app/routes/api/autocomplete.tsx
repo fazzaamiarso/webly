@@ -15,6 +15,8 @@ export const loader = async ({ request }: LoaderArgs) => {
             query,
             path: "name",
             fuzzy: {
+              maxExpansions: 256,
+              maxEdits: 2,
               prefixLength: 1,
             },
           },
