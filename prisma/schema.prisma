@@ -31,12 +31,13 @@ enum Category {
 }
 
 model Ticket {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  stock       Int      @default(1)
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  stock       Int     @default(1)
   description String
-  price       Int      @default(0)
-  Webinar     Webinar  @relation(fields: [webinarId], references: [id])
-  webinarId   String   @db.ObjectId
+  price       Int     @default(0)
+  Webinar     Webinar @relation(fields: [webinarId], references: [id])
+  webinarId   String  @db.ObjectId
+  Cart        Cart[]
 }
 
 model Webinar {
@@ -54,15 +55,27 @@ model Webinar {
 }
 
 model User {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  email     String    @unique
-  cart      String[] 
-  password  Password?
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  email    String    @unique
+  password Password?
+  cart     Cart[]
+}
+
+model Cart {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  quantity Int
+
+  Ticket   Ticket @relation(fields: [ticketId], references: [id])
+  ticketId String
+  User     User   @relation(fields: [userId], references: [id])
+  userId   String @db.ObjectId
+
+  @@unique([userId, ticketId])
 }
 
 model Password {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
   hash   String
-  User   User   @relation(fields: [userId], references: [id])
+  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique @db.ObjectId
 }

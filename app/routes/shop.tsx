@@ -20,14 +20,20 @@ import { authenticator } from "~/utils/auth.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const savedUser = await authenticator.isAuthenticated(request);
-  const user = await prisma.user.findFirst({
+  if (!savedUser)
+    return json({
+      email: null,
+      cartCount: 0,
+    });
+
+  const user = await prisma.user.findUnique({
     where: { id: savedUser?.userId },
-    select: { cart: true },
+    select: { cart: { select: { quantity: true } } },
   });
 
   return json({
-    email: savedUser?.email ?? null,
-    cartCount: user?.cart.length,
+    email: savedUser.email,
+    cartCount: user?.cart.reduce((acc, curr) => acc + curr.quantity, 0),
   });
 };
 

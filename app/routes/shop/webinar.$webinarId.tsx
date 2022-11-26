@@ -23,10 +23,15 @@ export const action = async ({ request }: ActionArgs) => {
   const ticketId = formData.get("ticket-id");
 
   invariant(typeof ticketId === "string", "ticketId must be a string");
+  invariant(
+    typeof user?.userId === "string",
+    "Illegal Action, must have a user!"
+  );
 
-  await prisma.user.update({
-    where: { id: user?.userId },
-    data: { cart: { push: ticketId } },
+  await prisma.cart.upsert({
+    where: { userId_ticketId: { ticketId, userId: user.userId } },
+    create: { ticketId, quantity: 1, userId: user.userId },
+    update: { quantity: { increment: 1 } },
   });
 
   return json(null);

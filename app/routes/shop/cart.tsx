@@ -9,49 +9,56 @@ export const loader = async ({ request }: LoaderArgs) => {
   const savedUser = await authenticator.isAuthenticated(request);
   const user = await prisma.user.findUnique({
     where: { id: savedUser?.userId },
-    select: { cart: true },
+    select: {
+      cart: {
+        select: {
+          id: true,
+          ticketId: true,
+          quantity: true,
+          Ticket: {
+            select: {
+              price: true,
+              Webinar: { select: { name: true, coverImg: true } },
+            },
+          },
+        },
+      },
+    },
   });
 
-  const cart = await prisma.ticket.findMany({
-    where: { id: { in: user?.cart } },
-    include: { Webinar: { select: { name: true, coverImg: true } } },
-  });
-
-  return json(cart);
+  return json(user?.cart);
 };
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   const ticketId = formData.get("ticket-id");
+  const quantity = formData.get("qty");
   const savedUser = await authenticator.isAuthenticated(request);
 
-  invariant(typeof ticketId === "string");
+  invariant(typeof ticketId === "string", "ticketId must be a string!");
+  invariant(typeof quantity === "string", "quantity must be a string!");
+  invariant(
+    typeof savedUser?.userId === "string",
+    "Illegal that user is not exist!"
+  );
 
-  const user = await prisma.user.findUnique({
-    where: { id: savedUser?.userId },
-    select: { cart: true },
-  });
-  if (!user) return json(null);
+  console.log(quantity);
+  if (Number(quantity) <= 1) {
+    await prisma.cart.delete({
+      where: { userId_ticketId: { ticketId, userId: savedUser.userId } },
+    });
+  } else {
+    await prisma.cart.update({
+      where: { userId_ticketId: { ticketId, userId: savedUser.userId } },
+      data: { quantity: { decrement: 1 } },
+    });
+  }
 
-  let isTicketRemoved = false;
-  const cart = await prisma.user.update({
-    where: { id: savedUser?.userId },
-    data: {
-      cart: user.cart.filter((id) => {
-        if (isTicketRemoved) return true;
-        const isSame = id === ticketId;
-        if (isSame) isTicketRemoved = true;
-        return !isSame;
-      }),
-    },
-  });
-
-  return json(cart);
+  return json(null);
 };
 
 export default function Cart() {
   const cart = useLoaderData<typeof loader>();
-
   return (
     <main className="w-11/12 max-w-2xl mx-auto py-12">
       <section className="w-full space-y-8">
@@ -63,21 +70,31 @@ export default function Cart() {
                 <li key={c.id} className="w-full p-4 flex items-start gap-2">
                   <div className="h-16 aspect-square rounded-sm overflow-hidden">
                     <img
-                      src={c.Webinar.coverImg}
+                      src={c.Ticket.Webinar.coverImg}
                       alt=""
                       className="object-cover object-center h-full"
                     />
                   </div>
                   <div>
-                    <h3>{c.Webinar.name}</h3>
+                    <h3>{c.Ticket.Webinar.name}</h3>
                     <p>Webinar Host</p>
                   </div>
                   <div>
-                    <div className="ml-auto">${c.price}</div>
+                    <div className="ml-auto">
+                      <span>{c.quantity} x </span>
+                      <span className="font-semibold">${c.Ticket.price}</span>
+                    </div>
                     <Form method="post">
+                      <input
+                        key={c.quantity}
+                        type="number"
+                        name="qty"
+                        defaultValue={c.quantity}
+                        hidden
+                      />
                       <button
                         name="ticket-id"
-                        value={c.id}
+                        value={c.ticketId}
                         className="text-blue-500"
                       >
                         Remove
