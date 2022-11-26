@@ -202,7 +202,7 @@ export default function Search() {
               ))}
             </select>
           </div>
-          <ul className="w-full flex items-center justify-between gap-8 flex-wrap">
+          <ul className="w-full flex items-center justify-between gap-8 flex-wrap pt-4">
             {webinars.map((w) => {
               return (
                 <li key={w.id} className="basis-[22%]">

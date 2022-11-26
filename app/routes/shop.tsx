@@ -43,7 +43,7 @@ export default function ShopLayout() {
   const webinars = useFetcher<typeof SearchLoader>();
   return (
     <>
-      <header className="w-full">
+      <header className="w-full border-b-[1px] border-black mb-4">
         <div className="bg-[#111828] py-2">
           <div className="w-11/12 mx-auto flex items-center">
             {user.email ? (
