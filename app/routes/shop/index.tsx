@@ -26,6 +26,7 @@ export default function Index() {
               id={w.id}
               cover={w.coverImg}
               name={w.name}
+              startDate={w.startDate}
               tickets={w.Tickets}
             />
           ))}

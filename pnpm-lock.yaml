@@ -19,6 +19,7 @@ specifiers:
   '@vercel/node': ^2.6.2
   bcrypt: ^5.1.0
   clsx: ^1.2.1
+  dayjs: ^1.11.6
   esbuild-register: ^3.4.1
   eslint: ^8.27.0
   eslint-config-prettier: ^8.5.0
@@ -46,6 +47,7 @@ dependencies:
   '@vercel/node': 2.6.4
   bcrypt: 5.1.0
   clsx: 1.2.1
+  dayjs: 1.11.6
   mongodb: 4.12.1
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -3908,6 +3910,10 @@ packages:
   /data-uri-to-buffer/3.0.1:
     resolution: {integrity: sha512-WboRycPNsVw3B3TL559F7kuBUM4d8CgMEvk6xEJlOp7OBPjt6G7z8WMWlD2rOFZLk6OYfFIUGsCOWzcQH9K2og==}
     engines: {node: '>= 6'}
+
+  /dayjs/1.11.6:
+    resolution: {integrity: sha512-zZbY5giJAinCG+7AGaw0wIhNZ6J8AhWuSXKvuc1KAyMiRsvGQWqh4L+MomvhdAYjN+lqvVCMq1I41e3YHvXkyQ==}
+    dev: false
 
   /deasync/0.1.28:
     resolution: {integrity: sha512-QqLF6inIDwiATrfROIyQtwOQxjZuek13WRYZ7donU5wJPLoP67MnYxA6QtqdvdBy2mMqv5m3UefBVdJjvevOYg==}

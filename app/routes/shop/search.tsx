@@ -4,7 +4,6 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   Form,
-  Link,
   useLoaderData,
   useSearchParams,
   useSubmit,
@@ -210,6 +209,7 @@ export default function Search() {
                 id={w.id}
                 cover={w.coverImg}
                 name={w.name}
+                startDate={w.startDate}
                 tickets={w.Tickets}
               />
             ))}

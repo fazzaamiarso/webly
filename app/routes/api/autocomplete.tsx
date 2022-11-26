@@ -31,6 +31,5 @@ export const loader = async ({ request }: LoaderArgs) => {
     ])
     .toArray();
 
-  console.log(results.map((r) => r.highlights.texts));
   return json(results);
 };
