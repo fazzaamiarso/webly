@@ -48,29 +48,37 @@ export default function WebinarDetails() {
         <p>{webinar?.description}</p>
         <p>Meeting via Zoom</p>
 
-        <fetcher.Form method="post" className="space-y-4">
-          <RadioGroup name="ticket-id" defaultValue={webinar?.Tickets[0].id}>
+        <fetcher.Form method="post" className="space-y-6">
+          <RadioGroup
+            name="ticket-id"
+            defaultValue={webinar?.Tickets[0].id}
+            className="space-y-2"
+          >
             <RadioGroup.Label className="font-semibold">
               Tickets
             </RadioGroup.Label>
-            {webinar?.Tickets.map((t) => {
-              return (
-                <RadioGroup.Option
-                  key={t.id}
-                  value={t.id}
-                  className={({ checked }) =>
-                    clsx(
-                      "p-4 rounded-md ring-1 w-full space-y-2",
-                      checked ? "ring-purple-600" : "ring-black"
-                    )
-                  }
-                >
-                  <div className="font-semibold text-lg">${t.price}</div>
-                  <p className="text-sm">{t.description}</p>
-                  <div className="text-sm">{t.stock} left in stock</div>
-                </RadioGroup.Option>
-              );
-            })}
+            <div className="space-y-4">
+              {webinar?.Tickets.map((t) => {
+                return (
+                  <RadioGroup.Option
+                    key={t.id}
+                    value={t.id}
+                    className={({ checked }) =>
+                      clsx(
+                        "p-4 rounded-md ring-1 w-full space-y-2",
+                        checked ? "ring-purple-600" : "ring-black"
+                      )
+                    }
+                  >
+                    <div className="font-semibold text-lg">
+                      {t.price === 0 ? "Free" : `$${t.price}`}
+                    </div>
+                    <p className="text-sm">{t.description}</p>
+                    <div className="text-sm">{t.stock} left in stock</div>
+                  </RadioGroup.Option>
+                );
+              })}
+            </div>
           </RadioGroup>
           <button
             className="w-full bg-black text-white py-2 rounded-md"

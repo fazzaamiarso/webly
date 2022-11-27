@@ -124,7 +124,12 @@ export default function Search() {
               </div>
               {!isCategoryOpen && (
                 <div className="text-sm">
-                  {searchParams.getAll("category").map(capitalize).join(", ")}
+                  {searchParams.getAll("category").length === 0
+                    ? "All Categories"
+                    : searchParams
+                        .getAll("category")
+                        .map(capitalize)
+                        .join(", ")}
                 </div>
               )}
               {isCategoryOpen && (

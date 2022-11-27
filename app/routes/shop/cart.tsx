@@ -62,7 +62,7 @@ export default function Cart() {
   return (
     <main className="w-11/12 max-w-2xl mx-auto py-12">
       <section className="w-full space-y-8">
-        <h2 className="font-bold mb-8 text-3xl">Shopping Cart</h2>
+        <h2 className="font-bold mb-8 text-3xl">Ticket Cart</h2>
         {cart && cart.length > 0 ? (
           <ul className="flex items-center  flex-wrap w-full">
             {cart.map((c) => {
@@ -84,9 +84,11 @@ export default function Cart() {
                         <h3>{c.Ticket.Webinar.name}</h3>
                         <p>Webinar Host</p>
                       </div>
-                      <div className="ml-auto">
-                        <span>{c.quantity} x </span>
-                        <span className="font-semibold">${c.Ticket.price}</span>
+                      <div className="ml-auto space-x-4">
+                        <span className="text-sm">{c.quantity} x </span>
+                        <span className="font-semibold">
+                          {c.Ticket.price === 0 ? "Free" : `$${c.Ticket.price}`}
+                        </span>
                       </div>
                     </div>
                     <Form method="post" className="ml-auto">

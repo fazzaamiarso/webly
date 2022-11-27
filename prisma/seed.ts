@@ -25,8 +25,9 @@ const fakeWebinars = faker.datatype.array(30).map((_) => {
 
 const runSeed = async () => {
   await prisma.user.deleteMany();
-  await prisma.ticket.deleteMany();
+  await prisma.cart.deleteMany();
   await prisma.webinar.deleteMany();
+  await prisma.ticket.deleteMany();
 
   console.log("🌱 Start Seeding!");
 
@@ -37,14 +38,52 @@ const runSeed = async () => {
   console.log("Creating Webinars Done!");
   console.log("Creating Tickets!");
   for (let w of fakeWebinars) {
-    await prisma.ticket.create({
-      data: {
-        webinarId: w.id as string,
-        description: faker.commerce.productDescription(),
-        stock: faker.datatype.number(10),
-        price: faker.datatype.number(30),
-      },
-    });
+    if (w.type === "FREE") {
+      await prisma.ticket.create({
+        data: {
+          webinarId: w.id as string,
+          description: faker.commerce.productDescription(),
+          stock: faker.datatype.number(10),
+          price: 0,
+        },
+      });
+    }
+    if (w.type === "MIX") {
+      await prisma.ticket.createMany({
+        data: [
+          {
+            webinarId: w.id as string,
+            description: faker.commerce.productDescription(),
+            stock: faker.datatype.number(10),
+            price: 0,
+          },
+          {
+            webinarId: w.id as string,
+            description: faker.commerce.productDescription(),
+            stock: faker.datatype.number(10),
+            price: faker.datatype.number(30),
+          },
+        ],
+      });
+    }
+    if (w.type === "PAID") {
+      await prisma.ticket.createMany({
+        data: [
+          {
+            webinarId: w.id as string,
+            description: faker.commerce.productDescription(),
+            stock: faker.datatype.number(10),
+            price: faker.datatype.number(30),
+          },
+          {
+            webinarId: w.id as string,
+            description: faker.commerce.productDescription(),
+            stock: faker.datatype.number(10),
+            price: faker.datatype.number(30),
+          },
+        ],
+      });
+    }
   }
 };
 
