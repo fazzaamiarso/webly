@@ -21,11 +21,21 @@ type SorterValues = typeof sorter[number]["value"];
 
 export const loader = async ({ request }: LoaderArgs) => {
   const query = new URL(request.url).searchParams.get("q");
+  const pricingType = new URL(request.url).searchParams.getAll("price");
   const sort: SorterValues = (new URL(request.url).searchParams.get("sort") ??
     "MOST_RELEVANT") as SorterValues;
   const categories = new URL(request.url).searchParams.getAll("category");
 
   let pipeline: any = [
+    {
+      $search: {
+        compound: {
+          must: [],
+          should: [],
+          filter: [],
+        },
+      },
+    },
     {
       $lookup: {
         from: "Ticket",
@@ -41,37 +51,35 @@ export const loader = async ({ request }: LoaderArgs) => {
   }
 
   if (query?.length) {
-    pipeline.unshift({ $search: { compound: {} } });
-    pipeline[0].$search.compound.must = [
-      {
-        text: {
-          query,
-          path: "name",
-        },
+    pipeline[0].$search.compound.must.push({
+      text: {
+        query,
+        path: "name",
       },
-    ];
-    pipeline[0].$search.compound.should = [
-      {
-        wildcard: {
-          allowAnalyzedField: true,
-          query: `*${query}*`,
-          path: "name",
-        },
+    });
+    pipeline[0].$search.compound.should.push({
+      wildcard: {
+        allowAnalyzedField: true,
+        query: `*${query}*`,
+        path: "name",
       },
-    ];
+    });
   }
 
   if (categories.length) {
-    if (!query?.length) pipeline.unshift({ $search: { compound: {} } });
-    pipeline[0].$search.compound.filter = [
-      {
-        text: {
-          query: categories,
-          path: "category",
-        },
+    pipeline[0].$search.compound.filter.push({
+      text: {
+        query: categories,
+        path: "category",
       },
-    ];
+    });
   }
+
+  let compound = pipeline[0].$search.compound;
+  for (let key in compound) {
+    if (compound[key].length === 0) delete compound[key];
+  }
+  if (Object.keys(compound).length === 0) pipeline.shift();
 
   const results = await(await mongoClient)
     .db("webinar-app")
@@ -106,7 +114,7 @@ export default function Search() {
               defaultValue={searchParams.get("q") ?? ""}
               name="q"
             />
-            <fieldset className="space-y-4">
+            <fieldset className="space-y-2">
               <div className="w-full flex items-center justify-between">
                 <legend>Categories</legend>
                 <button
@@ -163,6 +171,29 @@ export default function Search() {
                   </button>
                 </div>
               )}
+            </fieldset>
+            <fieldset>
+              <legend>Price</legend>
+              <label className="flex items-center gap-4 text-sm">
+                <input
+                  type="checkbox"
+                  name="price"
+                  id="FREE"
+                  value="FREE"
+                  defaultChecked={searchParams.getAll("price").includes("FREE")}
+                />
+                <span>Free</span>
+              </label>
+              <label className="flex items-center gap-4 text-sm">
+                <input
+                  type="checkbox"
+                  name="price"
+                  id="PAID"
+                  value="PAID"
+                  defaultChecked={searchParams.getAll("price").includes("PAID")}
+                />
+                <span>Paid</span>
+              </label>
             </fieldset>
           </Form>
         </section>

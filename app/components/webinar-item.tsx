@@ -19,7 +19,7 @@ export const WebinarItem = ({
   const priceText =
     tickets?.length > 1
       ? `from ${tickets[0].price === 0 ? "free" : `$${tickets[0].price}`}`
-      : `$${tickets[0].price}`;
+      : `${tickets[0].price === 0 ? "Free" : `$${tickets[0].price}`}`;
   return (
     <li key={id} className="w-full">
       <Link to={`/shop/webinar/${id}`} className="space-y-2 block w-full">
