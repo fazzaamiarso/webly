@@ -58,7 +58,7 @@ export default function WebinarDetails() {
               Tickets
             </RadioGroup.Label>
             <div className="space-y-4">
-              {webinar?.Tickets.map((t) => {
+              {webinar?.Tickets.sort((a, b) => a.price - b.price).map((t) => {
                 return (
                   <RadioGroup.Option
                     key={t.id}

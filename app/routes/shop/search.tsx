@@ -46,6 +46,13 @@ export const loader = async ({ request }: LoaderArgs) => {
     },
   ];
 
+  if (pricingType.length)
+    pipeline[0].$search.compound.filter.push({
+      text: {
+        query: pricingType.length === 2 ? [...pricingType, "MIX"] : pricingType,
+        path: "type",
+      },
+    });
   if (sort === "NEWEST") {
     pipeline.push({ $sort: { startDate: 1 } });
   }
@@ -58,7 +65,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       },
     });
     pipeline[0].$search.compound.should.push({
-      wildcard: {
+      regex: {
         allowAnalyzedField: true,
         query: `*${query}*`,
         path: "name",
