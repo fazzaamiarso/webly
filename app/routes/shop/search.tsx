@@ -17,13 +17,12 @@ const sorter = [
   { name: "Newest", value: "NEWEST" },
   { name: "Trending", value: "TRENDING" },
 ] as const;
+type SorterValues = typeof sorter[number]["value"];
 
 export const loader = async ({ request }: LoaderArgs) => {
   const query = new URL(request.url).searchParams.get("q");
-  const sort: typeof sorter[number]["value"] = (new URL(
-    request.url
-  ).searchParams.get("sort") ??
-    "MOST_RELEVANT") as typeof sorter[number]["value"];
+  const sort: SorterValues = (new URL(request.url).searchParams.get("sort") ??
+    "MOST_RELEVANT") as SorterValues;
   const categories = new URL(request.url).searchParams.getAll("category");
 
   let pipeline: any = [
@@ -37,7 +36,6 @@ export const loader = async ({ request }: LoaderArgs) => {
     },
   ];
 
-  //TODO: implement sort
   if (sort === "NEWEST") {
     pipeline.push({ $sort: { startDate: 1 } });
   }
@@ -49,7 +47,15 @@ export const loader = async ({ request }: LoaderArgs) => {
         text: {
           query,
           path: "name",
-          fuzzy: {},
+        },
+      },
+    ];
+    pipeline[0].$search.compound.should = [
+      {
+        wildcard: {
+          allowAnalyzedField: true,
+          query: `*${query}*`,
+          path: "name",
         },
       },
     ];

@@ -9,7 +9,7 @@ const randomCategory = () =>
 
 const randomType = () => faker.helpers.arrayElement(Object.values(TicketType));
 
-const fakeWebinars = faker.datatype.array(15).map((_) => {
+const fakeWebinars = faker.datatype.array(30).map((_) => {
   return {
     id: faker.database.mongodbObjectId(),
     coverImg: faker.image.food(),
@@ -24,7 +24,10 @@ const fakeWebinars = faker.datatype.array(15).map((_) => {
 });
 
 const runSeed = async () => {
+  await prisma.user.deleteMany();
+  await prisma.ticket.deleteMany();
   await prisma.webinar.deleteMany();
+
   console.log("🌱 Start Seeding!");
 
   console.log("Creating Webinars!");

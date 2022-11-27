@@ -67,7 +67,7 @@ model Cart {
 
   Ticket   Ticket @relation(fields: [ticketId], references: [id])
   ticketId String
-  User     User   @relation(fields: [userId], references: [id])
+  User     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   String @db.ObjectId
 
   @@unique([userId, ticketId])

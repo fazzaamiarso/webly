@@ -14,6 +14,7 @@ export const loader = async ({ request }: LoaderArgs) => {
           autocomplete: {
             query,
             path: "name",
+            tokenOrder: "any",
             fuzzy: {
               maxExpansions: 256,
               maxEdits: 2,
@@ -27,7 +28,9 @@ export const loader = async ({ request }: LoaderArgs) => {
         $project: {
           _id: 1,
           name: 1,
-          score: { $meta: "searchScore" },
+          score: {
+            $meta: "searchScore",
+          },
         },
       },
     ])
