@@ -26,8 +26,9 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="overflow-x-hidden">
         <Outlet />
+        <div id="overlay-root"></div>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
