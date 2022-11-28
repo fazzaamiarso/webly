@@ -94,11 +94,38 @@ export default function ShopLayout() {
         </div>
       </header>
       <Outlet />
-      <footer className="w-11/12 mx-auto py-8">
-        <div className="w-full">
-          <div className="flex flex-col ">
-            <p className="font-medium">Legal</p>
-            <ul>
+      <footer className="w-11/12 mx-auto py-12 pt-20 space-y-10">
+        <div className="w-full flex items-start gap-12 justify-between">
+          <div className="flex flex-col">
+            <p className="font-medium mb-3">Company</p>
+            <ul className="space-y-2">
+              <li>About</li>
+              <li>Blog</li>
+              <li>Jobs</li>
+              <li>Partners</li>
+            </ul>
+          </div>
+          <div className="flex flex-col">
+            <p className="font-medium mb-3">Company</p>
+            <ul className="space-y-2">
+              <li>About</li>
+              <li>Blog</li>
+              <li>Jobs</li>
+              <li>Partners</li>
+            </ul>
+          </div>
+          <div className="flex flex-col">
+            <p className="font-medium mb-3">Company</p>
+            <ul className="space-y-2">
+              <li>About</li>
+              <li>Blog</li>
+              <li>Jobs</li>
+              <li>Partners</li>
+            </ul>
+          </div>
+          <div className="flex flex-col">
+            <p className="font-medium mb-3">Legal</p>
+            <ul className="space-y-2">
               <li>Claim</li>
               <li>Privacy</li>
               <li>Terms</li>

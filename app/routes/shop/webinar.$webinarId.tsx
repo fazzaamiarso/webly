@@ -44,7 +44,7 @@ export default function WebinarDetails() {
   const fetcher = useFetcher();
 
   return (
-    <main className="w-11/12 mx-auto space-y-12 md:grid md:grid-cols-2 md:gap-8 pt-8">
+    <main className="w-11/12 mx-auto space-y-12 md:space-y-0 md:grid md:grid-cols-2 md:gap-8 pt-8">
       <section className="space-y-10">
         <div>
           <h2 className="font-bold mb-2 text-3xl">{webinar?.name}</h2>

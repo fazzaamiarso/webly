@@ -58,10 +58,11 @@ export const loader = async ({ request }: LoaderArgs) => {
   }
 
   if (query?.length) {
-    pipeline[0].$search.compound.must.push({
+    pipeline[0].$search.compound.should.push({
       text: {
         query,
         path: ["name", "category"],
+        fuzzy: {},
       },
     });
     pipeline[0].$search.compound.should.push({
@@ -82,7 +83,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     });
   }
 
-  let compound = pipeline[0].$search.compound;
+  const compound = pipeline[0].$search.compound;
   for (let key in compound) {
     if (compound[key].length === 0) delete compound[key];
   }
@@ -107,7 +108,7 @@ export default function Search() {
   const [searchParams] = useSearchParams();
 
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
-  const [isPricingOpen, setIsPricingOpen] = useState(true);
+  const [isPricingOpen, setIsPricingOpen] = useState(false);
 
   return (
     <main className="w-11/12 mx-auto">
@@ -122,9 +123,9 @@ export default function Search() {
               defaultValue={searchParams.get("q") ?? ""}
               name="q"
             />
-            <fieldset className="space-y-2">
+            <fieldset className="space-y-2 border-b-[1px] py-4 text-sm ">
               <div className="w-full flex items-center justify-between">
-                <legend>Categories</legend>
+                <legend className="font-semibold">Categories</legend>
                 <button
                   type="button"
                   onClick={() => setIsCategoryOpen(!isCategoryOpen)}
@@ -149,7 +150,7 @@ export default function Search() {
                 </div>
               )}
               {isCategoryOpen && (
-                <div className="space-y-1">
+                <div className="space-y-3 pt-4">
                   {Object.keys(Category).map((c) => {
                     return (
                       <label
@@ -162,6 +163,7 @@ export default function Search() {
                           id={c}
                           value={c}
                           checked={searchParams.getAll("category").includes(c)}
+                          className="rounded-sm"
                         />
                         <span>{capitalize(c)}</span>
                       </label>
@@ -180,9 +182,9 @@ export default function Search() {
                 </div>
               )}
             </fieldset>
-            <fieldset>
+            <fieldset className="border-b-[1px] py-4 text-sm ">
               <div className="w-full flex items-center justify-between">
-                <legend>Price</legend>
+                <legend className="font-semibold">Price</legend>
                 <button
                   type="button"
                   onClick={() => setIsPricingOpen(!isPricingOpen)}
@@ -196,8 +198,15 @@ export default function Search() {
                   />
                 </button>
               </div>
+              {!isPricingOpen && (
+                <div className="text-sm">
+                  {searchParams.getAll("price").length === 0
+                    ? "All Price"
+                    : searchParams.getAll("price").map(capitalize).join(", ")}
+                </div>
+              )}
               {isPricingOpen && (
-                <>
+                <div className="space-y-3 pt-4">
                   <label className="flex items-center gap-4 text-sm">
                     <input
                       type="checkbox"
@@ -207,6 +216,7 @@ export default function Search() {
                       defaultChecked={searchParams
                         .getAll("price")
                         .includes("FREE")}
+                      className="rounded-sm"
                     />
                     <span>Free</span>
                   </label>
@@ -219,10 +229,11 @@ export default function Search() {
                       defaultChecked={searchParams
                         .getAll("price")
                         .includes("PAID")}
+                      className="rounded-sm"
                     />
                     <span>Paid</span>
                   </label>
-                </>
+                </div>
               )}
             </fieldset>
           </Form>
