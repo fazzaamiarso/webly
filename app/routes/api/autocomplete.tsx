@@ -11,15 +11,35 @@ export const loader = async ({ request }: LoaderArgs) => {
     .aggregate([
       {
         $search: {
-          autocomplete: {
-            query,
-            path: "name",
-            tokenOrder: "any",
-            fuzzy: {
-              maxExpansions: 256,
-              maxEdits: 2,
-              prefixLength: 1,
-            },
+          compound: {
+            should: [
+              {
+                autocomplete: {
+                  query,
+                  path: "name",
+                  tokenOrder: "sequential",
+                  fuzzy: {
+                    maxExpansions: 256,
+                    maxEdits: 2,
+                    prefixLength: 1,
+                  },
+                  score: {
+                    boost: {
+                      value: 3,
+                    },
+                  },
+                },
+              },
+              {
+                text: {
+                  query,
+                  path: "name",
+                  fuzzy: {
+                    maxEdits: 2,
+                  },
+                },
+              },
+            ],
           },
         },
       },

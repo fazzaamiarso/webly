@@ -1,8 +1,10 @@
 import { RadioGroup } from "@headlessui/react";
+import { VideoCameraIcon } from "@heroicons/react/24/outline";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import clsx from "clsx";
+import dayjs from "dayjs";
 import invariant from "tiny-invariant";
 import { prisma } from "~/lib/prisma.server";
 import { authenticator } from "~/utils/auth.server";
@@ -43,21 +45,47 @@ export default function WebinarDetails() {
 
   return (
     <main className="w-11/12 mx-auto space-y-12 md:grid md:grid-cols-2 md:gap-8 pt-8">
-      <section className="space-y-4">
-        <h2 className="font-bold mb-2 text-3xl">{webinar?.name}</h2>
-        <p>{webinar?.description}</p>
-        <p>Meeting via Zoom</p>
-
+      <section className="space-y-10">
+        <div>
+          <h2 className="font-bold mb-2 text-3xl">{webinar?.name}</h2>
+          <p className="mb-4">{webinar?.description}</p>
+          <p className="flex items-center gap-2">
+            <VideoCameraIcon className="h-5 aspect-square" /> Meeting via Zoom
+          </p>
+        </div>
+        <div className="w-full">
+          <h3 className="text-lg font-semibold mb-2">Schedules</h3>
+          <div className="w-full flex items-center gap-10 mb-6">
+            <div>
+              <h4 className="font-medium">Registration Open</h4>
+              <div>
+                {dayjs(webinar?.registrationOpen).format("D MMMM YYYY")}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium">Registration Close</h4>
+              <div>
+                {dayjs(webinar?.registrationClosed).format("D MMMM YYYY")}
+              </div>
+            </div>
+          </div>
+          <div>
+            <div>
+              <h4 className="font-medium">Start Date</h4>
+              <div>{dayjs(webinar?.startDate).format("D MMMM YYYY")}</div>
+            </div>
+          </div>
+        </div>
         <fetcher.Form method="post" className="space-y-6">
           <RadioGroup
             name="ticket-id"
             defaultValue={webinar?.Tickets[0].id}
             className="space-y-2"
           >
-            <RadioGroup.Label className="font-semibold">
+            <RadioGroup.Label className="text-lg font-semibold">
               Tickets
             </RadioGroup.Label>
-            <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-x-4">
               {webinar?.Tickets.sort((a, b) => a.price - b.price).map((t) => {
                 return (
                   <RadioGroup.Option
@@ -65,8 +93,8 @@ export default function WebinarDetails() {
                     value={t.id}
                     className={({ checked }) =>
                       clsx(
-                        "p-4 rounded-md ring-1 w-full space-y-2",
-                        checked ? "ring-purple-600" : "ring-black"
+                        "p-4 rounded-md ring-1 w-full space-y-2 self-stretch cursor-pointer",
+                        checked ? "ring-purple-600 ring-2" : "ring-black"
                       )
                     }
                   >

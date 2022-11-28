@@ -61,7 +61,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     pipeline[0].$search.compound.must.push({
       text: {
         query,
-        path: "name",
+        path: ["name", "category"],
       },
     });
     pipeline[0].$search.compound.should.push({
@@ -88,7 +88,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   }
   if (Object.keys(compound).length === 0) pipeline.shift();
 
-  const results = await(await mongoClient)
+  const results = await (await mongoClient)
     .db("webinar-app")
     .collection("Webinar")
     .aggregate(pipeline)
@@ -107,6 +107,7 @@ export default function Search() {
   const [searchParams] = useSearchParams();
 
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
+  const [isPricingOpen, setIsPricingOpen] = useState(true);
 
   return (
     <main className="w-11/12 mx-auto">
@@ -180,27 +181,49 @@ export default function Search() {
               )}
             </fieldset>
             <fieldset>
-              <legend>Price</legend>
-              <label className="flex items-center gap-4 text-sm">
-                <input
-                  type="checkbox"
-                  name="price"
-                  id="FREE"
-                  value="FREE"
-                  defaultChecked={searchParams.getAll("price").includes("FREE")}
-                />
-                <span>Free</span>
-              </label>
-              <label className="flex items-center gap-4 text-sm">
-                <input
-                  type="checkbox"
-                  name="price"
-                  id="PAID"
-                  value="PAID"
-                  defaultChecked={searchParams.getAll("price").includes("PAID")}
-                />
-                <span>Paid</span>
-              </label>
+              <div className="w-full flex items-center justify-between">
+                <legend>Price</legend>
+                <button
+                  type="button"
+                  onClick={() => setIsPricingOpen(!isPricingOpen)}
+                >
+                  <ChevronDownIcon
+                    className={
+                      isPricingOpen
+                        ? "w-5 rotate-180 transition-all"
+                        : "w-5 transition-all"
+                    }
+                  />
+                </button>
+              </div>
+              {isPricingOpen && (
+                <>
+                  <label className="flex items-center gap-4 text-sm">
+                    <input
+                      type="checkbox"
+                      name="price"
+                      id="FREE"
+                      value="FREE"
+                      defaultChecked={searchParams
+                        .getAll("price")
+                        .includes("FREE")}
+                    />
+                    <span>Free</span>
+                  </label>
+                  <label className="flex items-center gap-4 text-sm">
+                    <input
+                      type="checkbox"
+                      name="price"
+                      id="PAID"
+                      value="PAID"
+                      defaultChecked={searchParams
+                        .getAll("price")
+                        .includes("PAID")}
+                    />
+                    <span>Paid</span>
+                  </label>
+                </>
+              )}
             </fieldset>
           </Form>
         </section>

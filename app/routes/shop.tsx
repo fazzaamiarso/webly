@@ -94,7 +94,19 @@ export default function ShopLayout() {
         </div>
       </header>
       <Outlet />
-      <footer></footer>
+      <footer className="w-11/12 mx-auto py-8">
+        <div className="w-full">
+          <div className="flex flex-col ">
+            <p className="font-medium">Legal</p>
+            <ul>
+              <li>Claim</li>
+              <li>Privacy</li>
+              <li>Terms</li>
+            </ul>
+          </div>
+        </div>
+        <p>2020 Webly, Inc. All rights reserved.</p>
+      </footer>
     </>
   );
 }
