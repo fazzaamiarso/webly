@@ -9,33 +9,46 @@ const randomCategory = () =>
 
 const randomType = () => faker.helpers.arrayElement(Object.values(TicketType));
 
-const fakeWebinars = faker.datatype.array(30).map((_) => {
+const fakeWebinars = faker.datatype.array(3).map((_) => {
+  const regOpen = faker.date.future();
+  const regClosed = faker.date.future(undefined, regOpen);
+  const startDate = faker.date.future(undefined, regClosed);
+  const endDate = faker.date.future(undefined, startDate);
+
   return {
-    id: faker.database.mongodbObjectId(),
     coverImg: faker.image.food(),
     name: faker.commerce.productName(),
     description: faker.commerce.productDescription(),
     type: randomType(),
-    endDate: faker.date.future(),
-    startDate: faker.date.future(),
-    registrationClosed: faker.date.future(),
+    endDate,
+    startDate,
+    registrationOpen: regOpen,
+    registrationClosed: regClosed,
     category: randomCategory(),
   } as Prisma.WebinarCreateManyInput;
 });
 
+const fakeSeller = {
+  name: faker.company.name(),
+  webinars: { createMany: { data: fakeWebinars } },
+} as Prisma.SellerCreateInput;
+
 const runSeed = async () => {
   await prisma.user.deleteMany();
+  await prisma.seller.deleteMany();
   await prisma.cart.deleteMany();
   await prisma.webinar.deleteMany();
   await prisma.ticket.deleteMany();
 
   console.log("🌱 Start Seeding!");
 
-  console.log("Creating Webinars!");
-  await prisma.webinar.createMany({
-    data: fakeWebinars,
-  });
-  console.log("Creating Webinars Done!");
+  console.log("Creating Sellers with Webinars!");
+  for (let _ of Array.from({ length: 10 })) {
+    await prisma.seller.create({
+      data: fakeSeller,
+    });
+  }
+  console.log("Creating Sellers Done!");
   console.log("Creating Tickets!");
   for (let w of fakeWebinars) {
     if (w.type === "FREE") {
@@ -45,44 +58,56 @@ const runSeed = async () => {
           description: faker.commerce.productDescription(),
           stock: faker.datatype.number(10),
           price: 0,
+          discountActive: faker.datatype.boolean(),
+          discountPercent: faker.datatype.float({
+            min: 0,
+            max: 1,
+            precision: 0.01,
+          }),
         },
       });
     }
-    if (w.type === "MIX") {
-      await prisma.ticket.createMany({
-        data: [
-          {
-            webinarId: w.id as string,
-            description: faker.commerce.productDescription(),
-            stock: faker.datatype.number(10),
-            price: 0,
-          },
-          {
-            webinarId: w.id as string,
-            description: faker.commerce.productDescription(),
-            stock: faker.datatype.number(10),
-            price: faker.datatype.number(30),
-          },
-        ],
-      });
-    }
-    if (w.type === "PAID") {
-      await prisma.ticket.createMany({
-        data: [
-          {
-            webinarId: w.id as string,
-            description: faker.commerce.productDescription(),
-            stock: faker.datatype.number(10),
-            price: faker.datatype.number(30),
-          },
-          {
-            webinarId: w.id as string,
-            description: faker.commerce.productDescription(),
-            stock: faker.datatype.number(10),
-            price: faker.datatype.number(30),
-          },
-        ],
-      });
+
+    const webinars = await prisma.webinar.findMany({
+      select: { id: true, type: true },
+    });
+    for (let w of webinars) {
+      if (w.type === "MIX") {
+        await prisma.ticket.createMany({
+          data: [
+            {
+              webinarId: w.id as string,
+              description: faker.commerce.productDescription(),
+              stock: faker.datatype.number(10),
+              price: 0,
+            },
+            {
+              webinarId: w.id as string,
+              description: faker.commerce.productDescription(),
+              stock: faker.datatype.number(10),
+              price: faker.datatype.number(30),
+            },
+          ],
+        });
+      }
+      if (w.type === "PAID") {
+        await prisma.ticket.createMany({
+          data: [
+            {
+              webinarId: w.id as string,
+              description: faker.commerce.productDescription(),
+              stock: faker.datatype.number(10),
+              price: faker.datatype.number(30),
+            },
+            {
+              webinarId: w.id as string,
+              description: faker.commerce.productDescription(),
+              stock: faker.datatype.number(10),
+              price: faker.datatype.number(30),
+            },
+          ],
+        });
+      }
     }
   }
 };

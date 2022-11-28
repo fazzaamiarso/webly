@@ -31,13 +31,22 @@ enum Category {
 }
 
 model Ticket {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  stock       Int     @default(1)
-  description String
-  price       Int     @default(0)
-  Webinar     Webinar @relation(fields: [webinarId], references: [id], onDelete: Cascade)
-  webinarId   String  @db.ObjectId
-  Cart        Cart[]
+  id              String  @id @default(auto()) @map("_id") @db.ObjectId
+  stock           Int     @default(1)
+  description     String
+  price           Int     @default(0)
+  discountPercent Float     @default(0)
+  discountActive  Boolean @default(false)
+  Webinar         Webinar @relation(fields: [webinarId], references: [id], onDelete: Cascade)
+  webinarId       String  @db.ObjectId
+  Cart            Cart[]
+}
+
+model Seller {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  createdAt DateTime  @default(now())
+  webinars  Webinar[]
 }
 
 model Webinar {
@@ -52,6 +61,8 @@ model Webinar {
   registrationClosed DateTime
   category           Category
   Tickets            Ticket[]
+  seller             Seller     @relation(fields: [sellerId], references: [id])
+  sellerId           String     @db.ObjectId
 }
 
 model User {
