@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { WebinarItem } from "~/components/webinar-item";
 import { mongoClient } from "~/lib/mongodb.server";
+import { prisma } from "~/lib/prisma.server";
 
 const sorter = [
   { name: "Most Relevant", value: "MOST_RELEVANT" },
@@ -58,20 +59,29 @@ export const loader = async ({ request }: LoaderArgs) => {
   }
 
   if (query?.length) {
-    pipeline[0].$search.compound.should.push({
+    pipeline[0].$search.compound.must.push({
       text: {
         query,
-        path: ["name", "category"],
+        path: ["name"],
         fuzzy: {},
       },
     });
-    pipeline[0].$search.compound.should.push({
-      regex: {
-        allowAnalyzedField: true,
-        query: `*${query}*`,
-        path: "name",
+    pipeline[0].$search.compound.should.push(
+      {
+        text: {
+          query,
+          path: ["category"],
+          fuzzy: {},
+        },
       },
-    });
+      {
+        regex: {
+          allowAnalyzedField: true,
+          query: `*${query}*`,
+          path: "name",
+        },
+      }
+    );
   }
 
   if (categories.length) {
@@ -89,13 +99,24 @@ export const loader = async ({ request }: LoaderArgs) => {
   }
   if (Object.keys(compound).length === 0) pipeline.shift();
 
-  const results = await (await mongoClient)
+  const results = await(await mongoClient)
     .db("webinar-app")
     .collection("Webinar")
     .aggregate(pipeline)
     .toArray();
 
-  return json(results);
+  //This is bad, maybe just use embedded document
+  const withSeller = await Promise.all(
+    results.map(async (w) => {
+      const seller = await prisma.seller.findUnique({
+        where: { id: w.sellerId.toString() },
+        select: { name: true },
+      });
+      return { ...w, seller };
+    })
+  );
+
+  return json(withSeller as any);
 };
 
 const capitalize = (str: string) => {
@@ -154,15 +175,17 @@ export default function Search() {
                   {Object.keys(Category).map((c) => {
                     return (
                       <label
-                        key={c}
+                        key={c + searchParams.getAll("category").includes(c)}
                         className="flex items-center gap-4 text-sm"
                       >
                         <input
                           type="checkbox"
                           name="category"
                           id={c}
-                          value={c}
-                          checked={searchParams.getAll("category").includes(c)}
+                          defaultValue={c}
+                          defaultChecked={searchParams
+                            .getAll("category")
+                            .includes(c)}
                           className="rounded-sm"
                         />
                         <span>{capitalize(c)}</span>
@@ -212,7 +235,7 @@ export default function Search() {
                       type="checkbox"
                       name="price"
                       id="FREE"
-                      value="FREE"
+                      defaultValue="FREE"
                       defaultChecked={searchParams
                         .getAll("price")
                         .includes("FREE")}
@@ -225,7 +248,7 @@ export default function Search() {
                       type="checkbox"
                       name="price"
                       id="PAID"
-                      value="PAID"
+                      defaultValue="PAID"
                       defaultChecked={searchParams
                         .getAll("price")
                         .includes("PAID")}
@@ -260,14 +283,14 @@ export default function Search() {
               }}
             >
               {sorter.map((s) => (
-                <option key={s.value} value={s.value}>
+                <option key={s.value} defaultValue={s.value}>
                   {s.name}
                 </option>
               ))}
             </select>
           </div>
           <ul className="w-full pt-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-6 gap-y-8">
-            {webinars.map((w) => (
+            {webinars.map((w: any) => (
               <WebinarItem
                 key={w._id}
                 id={w._id}
@@ -275,6 +298,7 @@ export default function Search() {
                 name={w.name}
                 startDate={w.startDate}
                 tickets={w.tickets}
+                seller={w.seller?.name}
               />
             ))}
           </ul>

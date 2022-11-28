@@ -6,7 +6,10 @@ import { prisma } from "~/lib/prisma.server";
 export const loader = async () => {
   const webinars = await prisma.webinar.findMany({
     take: 10,
-    include: { Tickets: { select: { price: true } } },
+    include: {
+      Tickets: { select: { price: true } },
+      seller: { select: { name: true } },
+    },
   });
   return json(webinars);
 };
@@ -28,6 +31,7 @@ export default function Index() {
               name={w.name}
               startDate={w.startDate}
               tickets={w.Tickets}
+              seller={w.seller.name}
             />
           ))}
         </ul>

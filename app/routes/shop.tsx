@@ -13,13 +13,14 @@ import {
   useSubmit,
   Outlet,
   useLoaderData,
+  useSearchParams,
 } from "@remix-run/react";
 import clsx from "clsx";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { prisma } from "~/lib/prisma.server";
-import type { loader as SearchLoader } from "~/routes/shop/search";
+import type { loader as SearchLoader } from "~/routes/api/autocomplete";
 import { authenticator } from "~/utils/auth.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
@@ -143,13 +144,21 @@ const SearchAutocomplete = () => {
   const submit = useSubmit();
   const webinars = useFetcher<typeof SearchLoader>();
 
+  const [searchParams] = useSearchParams();
   const [query, setQuery] = useState("");
 
   const onSelect = (value: unknown) => {
     if (!value || typeof value !== "string") return;
-    submit(new URLSearchParams({ q: value }), {
-      action: searchPath,
-    });
+    searchParams.delete("q");
+    submit(
+      new URLSearchParams([
+        ...Array.from(searchParams.entries()),
+        ...Object.entries({ q: value }),
+      ]),
+      {
+        action: searchPath,
+      }
+    );
   };
 
   const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {

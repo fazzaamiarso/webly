@@ -13,7 +13,7 @@ export const loader = async ({ params }: LoaderArgs) => {
   invariant(params.webinarId, `Expected ${params.webinarId}!`);
   const webinar = await prisma.webinar.findUnique({
     where: { id: params.webinarId },
-    include: { Tickets: true },
+    include: { Tickets: true, seller: { select: { name: true } } },
   });
 
   return json(webinar);
@@ -52,6 +52,12 @@ export default function WebinarDetails() {
           <p className="flex items-center gap-2">
             <VideoCameraIcon className="h-5 aspect-square" /> Meeting via Zoom
           </p>
+        </div>
+        <div>
+          <h3>
+            Hosted by{" "}
+            <span className="font-semibold">{webinar?.seller.name}</span>
+          </h3>
         </div>
         <div className="w-full">
           <h3 className="text-lg font-semibold mb-2">Schedules</h3>

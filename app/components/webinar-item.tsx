@@ -6,6 +6,7 @@ type WebinarItemsProps = {
   cover: string;
   name: string;
   startDate: string;
+  seller: string;
   tickets: { price: number }[];
 };
 
@@ -15,6 +16,7 @@ export const WebinarItem = ({
   name,
   tickets,
   startDate,
+  seller,
 }: WebinarItemsProps) => {
   const priceText =
     tickets?.length > 1
@@ -35,7 +37,7 @@ export const WebinarItem = ({
             <p className="font-medium text-sm md:text-base line-clamp-1">
               {name}
             </p>
-            <p className="text-sm ">Webinar host</p>
+            <p className="text-sm ">{seller}</p>
           </div>
         </div>
         <div className="w-full flex">
