@@ -201,7 +201,10 @@ const SearchAutocomplete = () => {
                         clsx("rounded-sm p-2", active && "bg-[#f3f3f6]")
                       }
                     >
-                      {w.name} <span className="text-sm ml-2">in Webinar</span>
+                      {w.name}{" "}
+                      <span className="text-sm ml-2">
+                        in {w.type === "webinar" ? "Webinar" : "Seller"}
+                      </span>
                     </Combobox.Option>
                   );
                 })}

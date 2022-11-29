@@ -11,7 +11,6 @@ import {
 import { useState } from "react";
 import { WebinarItem } from "~/components/webinar-item";
 import { mongoClient } from "~/lib/mongodb.server";
-import { prisma } from "~/lib/prisma.server";
 
 const sorter = [
   { name: "Most Relevant", value: "MOST_RELEVANT" },
@@ -39,6 +38,14 @@ export const loader = async ({ request }: LoaderArgs) => {
     },
     {
       $lookup: {
+        from: "Seller",
+        localField: "sellerId",
+        foreignField: "_id",
+        as: "seller",
+      },
+    },
+    {
+      $lookup: {
         from: "Ticket",
         localField: "_id",
         foreignField: "webinarId",
@@ -59,7 +66,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   }
 
   if (query?.length) {
-    pipeline[0].$search.compound.must.push({
+    pipeline[0].$search.compound.should.push({
       text: {
         query,
         path: ["name"],
@@ -105,18 +112,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     .aggregate(pipeline)
     .toArray();
 
-  //This is bad, maybe just use embedded document
-  const withSeller = await Promise.all(
-    results.map(async (w) => {
-      const seller = await prisma.seller.findUnique({
-        where: { id: w.sellerId.toString() },
-        select: { name: true },
-      });
-      return { ...w, seller };
-    })
-  );
-
-  return json(withSeller as any);
+  return json(results);
 };
 
 const capitalize = (str: string) => {
@@ -205,7 +201,7 @@ export default function Search() {
                 </div>
               )}
             </fieldset>
-            <fieldset className="border-b-[1px] py-4 text-sm ">
+            <fieldset className="border-b-[1px] space-y-2 py-4 text-sm ">
               <div className="w-full flex items-center justify-between">
                 <legend className="font-semibold">Price</legend>
                 <button
@@ -298,7 +294,7 @@ export default function Search() {
                 name={w.name}
                 startDate={w.startDate}
                 tickets={w.tickets}
-                seller={w.seller?.name}
+                seller={w.seller[0].name}
               />
             ))}
           </ul>

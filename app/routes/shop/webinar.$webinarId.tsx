@@ -1,5 +1,6 @@
 import { RadioGroup } from "@headlessui/react";
 import { VideoCameraIcon } from "@heroicons/react/24/outline";
+import { Ticket, Webinar } from "@prisma/client";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
@@ -41,7 +42,6 @@ export const action = async ({ request }: ActionArgs) => {
 
 export default function WebinarDetails() {
   const webinar = useLoaderData<typeof loader>();
-  const fetcher = useFetcher();
 
   return (
     <main className="w-11/12 mx-auto space-y-12 md:space-y-0 md:grid md:grid-cols-2 md:gap-8 pt-8">
@@ -61,66 +61,21 @@ export default function WebinarDetails() {
         </div>
         <div className="w-full">
           <h3 className="text-lg font-semibold mb-2">Schedules</h3>
-          <div className="w-full flex items-center gap-10 mb-6">
-            <div>
-              <h4 className="font-medium">Registration Open</h4>
-              <div>
-                {dayjs(webinar?.registrationOpen).format("D MMMM YYYY")}
-              </div>
+          {webinar && (
+            <div className="w-full flex items-center gap-10 mb-6">
+              <ScheduleItem
+                title="Registration Open"
+                dateString={webinar.registrationOpen}
+              />
+              <ScheduleItem
+                title="Registration Closed"
+                dateString={webinar.registrationClosed}
+              />
+              <ScheduleItem title="Start Date" dateString={webinar.startDate} />
             </div>
-            <div>
-              <h4 className="font-medium">Registration Close</h4>
-              <div>
-                {dayjs(webinar?.registrationClosed).format("D MMMM YYYY")}
-              </div>
-            </div>
-          </div>
-          <div>
-            <div>
-              <h4 className="font-medium">Start Date</h4>
-              <div>{dayjs(webinar?.startDate).format("D MMMM YYYY")}</div>
-            </div>
-          </div>
+          )}
         </div>
-        <fetcher.Form method="post" className="space-y-6">
-          <RadioGroup
-            name="ticket-id"
-            defaultValue={webinar?.Tickets[0].id}
-            className="space-y-2"
-          >
-            <RadioGroup.Label className="text-lg font-semibold">
-              Tickets
-            </RadioGroup.Label>
-            <div className="grid md:grid-cols-2 gap-x-4">
-              {webinar?.Tickets.sort((a, b) => a.price - b.price).map((t) => {
-                return (
-                  <RadioGroup.Option
-                    key={t.id}
-                    value={t.id}
-                    className={({ checked }) =>
-                      clsx(
-                        "p-4 rounded-md ring-1 w-full space-y-2 self-stretch cursor-pointer",
-                        checked ? "ring-purple-600 ring-2" : "ring-black"
-                      )
-                    }
-                  >
-                    <div className="font-semibold text-lg">
-                      {t.price === 0 ? "Free" : `$${t.price}`}
-                    </div>
-                    <p className="text-sm">{t.description}</p>
-                    <div className="text-sm">{t.stock} left in stock</div>
-                  </RadioGroup.Option>
-                );
-              })}
-            </div>
-          </RadioGroup>
-          <button
-            className="w-full bg-black text-white py-2 rounded-md"
-            disabled={fetcher.state === "submitting"}
-          >
-            Add to cart
-          </button>
-        </fetcher.Form>
+        <TicketSelect tickets={webinar?.Tickets ?? []} />
       </section>
       <section className="">
         <div className="">
@@ -130,3 +85,67 @@ export default function WebinarDetails() {
     </main>
   );
 }
+
+const ScheduleItem = ({
+  title,
+  dateString,
+}: {
+  title: string;
+  dateString: string;
+}) => {
+  return (
+    <div>
+      <h4 className="font-medium">{title}</h4>
+      <div>{dayjs(dateString).format("D MMMM YYYY")}</div>
+    </div>
+  );
+};
+
+const TicketSelect = ({ tickets }: { tickets: Ticket[] }) => {
+  const fetcher = useFetcher();
+
+  const isBusy = fetcher.state === "submitting";
+  const ticketPriceAscending = tickets.sort((a, b) => a.price - b.price);
+
+  return (
+    <fetcher.Form method="post" className="space-y-6">
+      <RadioGroup
+        name="ticket-id"
+        defaultValue={tickets[0].id}
+        className="space-y-2"
+      >
+        <RadioGroup.Label className="text-lg font-semibold">
+          Tickets
+        </RadioGroup.Label>
+        <div className="grid md:grid-cols-2 gap-x-4">
+          {ticketPriceAscending.map((t) => {
+            return (
+              <RadioGroup.Option
+                key={t.id}
+                value={t.id}
+                className={({ checked }) =>
+                  clsx(
+                    "p-4 rounded-md ring-1 w-full space-y-2 self-stretch cursor-pointer",
+                    checked ? "ring-purple-600 ring-2" : "ring-black"
+                  )
+                }
+              >
+                <div className="font-semibold text-lg">
+                  {t.price === 0 ? "Free" : `$${t.price}`}
+                </div>
+                <p className="text-sm">{t.description}</p>
+                <div className="text-sm">{t.stock} left in stock</div>
+              </RadioGroup.Option>
+            );
+          })}
+        </div>
+      </RadioGroup>
+      <button
+        className="w-full bg-black text-white py-2 rounded-md"
+        disabled={isBusy}
+      >
+        Add to cart
+      </button>
+    </fetcher.Form>
+  );
+};
