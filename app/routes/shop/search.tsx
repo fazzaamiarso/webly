@@ -63,9 +63,6 @@ export const loader = async ({ request }: LoaderArgs) => {
         path: "type",
       },
     });
-  if (sort === "NEWEST") {
-    pipeline.push({ $sort: { startDate: 1 } });
-  }
 
   if (query?.length) {
     pipeline[0].$search.compound.should.push({
@@ -100,6 +97,10 @@ export const loader = async ({ request }: LoaderArgs) => {
         path: "category",
       },
     });
+  }
+
+  if (sort === "NEWEST") {
+    pipeline.push({ $sort: { startDate: 1 } });
   }
 
   const compound = pipeline[0].$search.compound;
@@ -186,18 +187,17 @@ export default function Search() {
               className="text-sm border-none font-semibold"
               onChange={(e) => {
                 searchParams.delete("sort");
-                const data = new URLSearchParams([
-                  ...Array.from(searchParams.entries()),
-                  ...Object.entries({ sort: e.target.value }),
-                ]);
-                submit(data);
+                searchParams.append("sort", e.target.value);
+                submit(searchParams);
               }}
             >
-              {sorter.map((s) => (
-                <option key={s.value} defaultValue={s.value}>
-                  {s.name}
-                </option>
-              ))}
+              {sorter.map((s) => {
+                return (
+                  <option key={s.value} defaultValue={s.value} value={s.value}>
+                    {s.name}
+                  </option>
+                );
+              })}
             </select>
           </div>
           <ul className="w-full pt-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-6 gap-y-8">
