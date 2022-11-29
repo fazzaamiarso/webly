@@ -8,7 +8,9 @@ import {
   useSearchParams,
   useSubmit,
 } from "@remix-run/react";
-import { useState } from "react";
+import type { ReactNode } from "react";
+import { Fragment } from "react";
+import { useId, useState } from "react";
 import { WebinarItem } from "~/components/webinar-item";
 import { mongoClient } from "~/lib/mongodb.server";
 
@@ -124,9 +126,6 @@ export default function Search() {
   const webinars = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
 
-  const [isCategoryOpen, setIsCategoryOpen] = useState(true);
-  const [isPricingOpen, setIsPricingOpen] = useState(false);
-
   return (
     <main className="w-11/12 mx-auto">
       <div className="w-full flex items-start py-8 gap-12">
@@ -134,127 +133,43 @@ export default function Search() {
         <section className="basis-[20%]">
           <Form className="w-full" onChange={(e) => submit(e.currentTarget)}>
             <h2 className="font-semibold text-lg mb-6">Filters</h2>
-            <input
-              type="text"
-              hidden
-              defaultValue={searchParams.get("q") ?? ""}
-              name="q"
-            />
-            <fieldset className="space-y-2 border-b-[1px] py-4 text-sm ">
-              <div className="w-full flex items-center justify-between">
-                <legend className="font-semibold">Categories</legend>
-                <button
-                  type="button"
-                  onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                >
-                  <ChevronDownIcon
-                    className={
-                      isCategoryOpen
-                        ? "w-5 rotate-180 transition-all"
-                        : "w-5 transition-all"
-                    }
-                  />
-                </button>
-              </div>
-              {!isCategoryOpen && (
-                <div className="text-sm">
-                  {searchParams.getAll("category").length === 0
-                    ? "All Categories"
-                    : searchParams
-                        .getAll("category")
-                        .map(capitalize)
-                        .join(", ")}
-                </div>
-              )}
-              {isCategoryOpen && (
-                <div className="space-y-3 pt-4">
-                  {Object.keys(Category).map((c) => {
-                    return (
-                      <label
-                        key={c + searchParams.getAll("category").includes(c)}
-                        className="flex items-center gap-4 text-sm"
-                      >
-                        <input
-                          type="checkbox"
-                          name="category"
-                          id={c}
-                          defaultValue={c}
-                          defaultChecked={searchParams
-                            .getAll("category")
-                            .includes(c)}
-                          className="rounded-sm"
-                        />
-                        <span>{capitalize(c)}</span>
-                      </label>
-                    );
-                  })}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      searchParams.delete("category");
-                      submit(searchParams);
-                    }}
-                    className="text-sm text-blue-500"
-                  >
-                    Reset
-                  </button>
-                </div>
-              )}
-            </fieldset>
-            <fieldset className="border-b-[1px] space-y-2 py-4 text-sm ">
-              <div className="w-full flex items-center justify-between">
-                <legend className="font-semibold">Price</legend>
-                <button
-                  type="button"
-                  onClick={() => setIsPricingOpen(!isPricingOpen)}
-                >
-                  <ChevronDownIcon
-                    className={
-                      isPricingOpen
-                        ? "w-5 rotate-180 transition-all"
-                        : "w-5 transition-all"
-                    }
-                  />
-                </button>
-              </div>
-              {!isPricingOpen && (
-                <div className="text-sm">
-                  {searchParams.getAll("price").length === 0
-                    ? "All Price"
-                    : searchParams.getAll("price").map(capitalize).join(", ")}
-                </div>
-              )}
-              {isPricingOpen && (
-                <div className="space-y-3 pt-4">
-                  <label className="flex items-center gap-4 text-sm">
-                    <input
-                      type="checkbox"
-                      name="price"
-                      id="FREE"
-                      defaultValue="FREE"
-                      defaultChecked={searchParams
-                        .getAll("price")
-                        .includes("FREE")}
-                      className="rounded-sm"
-                    />
-                    <span>Free</span>
-                  </label>
-                  <label className="flex items-center gap-4 text-sm">
-                    <input
-                      type="checkbox"
-                      name="price"
-                      id="PAID"
-                      defaultValue="PAID"
-                      defaultChecked={searchParams
-                        .getAll("price")
-                        .includes("PAID")}
-                      className="rounded-sm"
-                    />
-                    <span>Paid</span>
-                  </label>
-                </div>
-              )}
-            </fieldset>
+            <input type="text" hidden defaultValue={searchParams.get("q") ?? ""} name="q" />
+            <FilterWrapper fieldName="category" title="Categories">
+              {({ isOpen }) =>
+                isOpen && (
+                  <div className="space-y-3 pt-4">
+                    {Object.keys(Category).map((c) => (
+                      <FilterCheckbox
+                        key={c}
+                        defaultValue={c}
+                        fieldName="category"
+                        displayValue={capitalize(c)}
+                      />
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        searchParams.delete("category");
+                        submit(searchParams);
+                      }}
+                      className="text-sm text-blue-500"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                )
+              }
+            </FilterWrapper>
+            <FilterWrapper fieldName="price" title="Price">
+              {({ isOpen }) =>
+                isOpen && (
+                  <div className="space-y-3 pt-4">
+                    <FilterCheckbox defaultValue="FREE" fieldName="price" displayValue="Free" />
+                    <FilterCheckbox defaultValue="PAID" fieldName="price" displayValue="Paid" />
+                  </div>
+                )
+              }
+            </FilterWrapper>
           </Form>
         </section>
         {/* FILTER END */}
@@ -304,3 +219,59 @@ export default function Search() {
     </main>
   );
 }
+
+type FilterWrapperProps = {
+  children: ({ isOpen }: { isOpen: boolean }) => ReactNode;
+  title: string;
+  fieldName: string;
+};
+const FilterWrapper = ({ children, title, fieldName }: FilterWrapperProps) => {
+  const [searchParams] = useSearchParams();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const paramValues = searchParams.getAll(fieldName);
+  return (
+    <fieldset className={"border-b-[1px] py-4 text-sm"}>
+      <div className="w-full flex items-center justify-between">
+        <legend className="font-semibold">{title}</legend>
+        <button type="button" onClick={() => setIsOpen((prev) => !prev)}>
+          <ChevronDownIcon
+            className={isOpen ? "w-5 rotate-180 transition-all" : "w-5 transition-all"}
+          />
+        </button>
+      </div>
+      {!isOpen && (
+        <div className="text-sm mt-2">
+          {paramValues.length === 0 ? null : paramValues.map(capitalize).join(", ")}
+        </div>
+      )}
+      {isOpen && <Fragment>{children({ isOpen })}</Fragment>}
+    </fieldset>
+  );
+};
+
+type FilterCheckboxProps = {
+  defaultValue: string;
+  displayValue: string;
+  fieldName: string;
+};
+const FilterCheckbox = ({ defaultValue, displayValue, fieldName }: FilterCheckboxProps) => {
+  const id = useId();
+  const [searchParams] = useSearchParams();
+
+  const checked = searchParams.getAll(fieldName).includes(defaultValue);
+  return (
+    <label key={fieldName + id} className="flex items-center gap-4 text-sm">
+      <input
+        key={String(checked)}
+        type="checkbox"
+        name={fieldName}
+        id={id}
+        defaultValue={defaultValue}
+        defaultChecked={checked}
+        className="rounded-sm"
+      />
+      <span>{displayValue}</span>
+    </label>
+  );
+};
