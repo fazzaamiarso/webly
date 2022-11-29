@@ -28,7 +28,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   if (!savedUser)
     return json({
       email: null,
-      cartCount: 0,
+      cartItemsCount: 0,
     });
 
   const user = await prisma.user.findUnique({
@@ -38,7 +38,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 
   return json({
     email: savedUser.email,
-    cartCount: user?.cart.reduce((acc, curr) => acc + curr.quantity, 0),
+    cartItemsCount: user?.cart.reduce((acc, curr) => acc + curr.quantity, 0),
   });
 };
 
@@ -87,7 +87,7 @@ export default function ShopLayout() {
                 aria-hidden="true"
               />
               <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                {user.cartCount}
+                {user.cartItemsCount}
               </span>
               <span className="sr-only">items in cart, view bag</span>
             </Link>
@@ -142,7 +142,8 @@ export default function ShopLayout() {
 const SearchAutocomplete = () => {
   const searchPath = "/shop/search";
   const submit = useSubmit();
-  const webinars = useFetcher<typeof SearchLoader>();
+  const webinarFetcher = useFetcher<typeof SearchLoader>();
+  const webinars = webinarFetcher.data ?? [];
 
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState("");
@@ -150,36 +151,25 @@ const SearchAutocomplete = () => {
   const onSelect = (value: unknown) => {
     if (!value || typeof value !== "string") return;
     searchParams.delete("q");
-    submit(
-      new URLSearchParams([
-        ...Array.from(searchParams.entries()),
-        ...Object.entries({ q: value }),
-      ]),
-      {
-        action: searchPath,
-      }
-    );
+
+    const currParams = Array.from(searchParams.entries());
+    const newParams = Object.entries({ q: value });
+
+    submit(new URLSearchParams([...currParams, ...newParams]), {
+      action: searchPath,
+    });
   };
 
   const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputQuery = e.target.value;
     if (inputQuery === "") return;
     setQuery(inputQuery);
-    webinars.load(`/api/autocomplete?q=${inputQuery}`);
+    webinarFetcher.load(`/api/autocomplete?q=${inputQuery}`);
   };
 
   return (
-    <Form
-      action={searchPath}
-      method="get"
-      className="w-full flex gap-2 relative max-w-lg"
-    >
-      <Combobox
-        nullable
-        as="div"
-        className="w-full relative"
-        onChange={onSelect}
-      >
+    <Form action={searchPath} method="get" className="w-full flex gap-2 relative max-w-lg">
+      <Combobox nullable as="div" className="w-full relative" onChange={onSelect}>
         {({ open }) => {
           return (
             <>
@@ -192,14 +182,12 @@ const SearchAutocomplete = () => {
                 onChange={onInputChange}
               />
               <Combobox.Options className="absolute bottom-0 left-0 w-full z-50 rounded-md translate-y-[105%] bg-white shadow-lg p-4 space-y-2">
-                {webinars.data?.map((w) => {
+                {webinars.map((w) => {
                   return (
                     <Combobox.Option
                       key={w._id}
                       value={w.name}
-                      className={({ active }) =>
-                        clsx("rounded-sm p-2", active && "bg-[#f3f3f6]")
-                      }
+                      className={({ active }) => clsx("rounded-sm p-2", active && "bg-[#f3f3f6]")}
                     >
                       {w.name}{" "}
                       <span className="text-sm ml-2">
@@ -217,11 +205,8 @@ const SearchAutocomplete = () => {
                     )
                   }
                 >
-                  <span>Show results for '{query}'</span>{" "}
-                  <ChevronRightIcon
-                    className="h-5 aspect-square"
-                    aria-hidden="true"
-                  />
+                  <span>Show results for '{query}'</span>
+                  <ChevronRightIcon className="h-5 aspect-square" aria-hidden="true" />
                 </Combobox.Option>
               </Combobox.Options>
             </>

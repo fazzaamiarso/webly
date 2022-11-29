@@ -1,6 +1,6 @@
 import { RadioGroup } from "@headlessui/react";
 import { VideoCameraIcon } from "@heroicons/react/24/outline";
-import { Ticket, Webinar } from "@prisma/client";
+import type { Ticket } from "@prisma/client";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
@@ -26,10 +26,7 @@ export const action = async ({ request }: ActionArgs) => {
   const ticketId = formData.get("ticket-id");
 
   invariant(typeof ticketId === "string", "ticketId must be a string");
-  invariant(
-    typeof user?.userId === "string",
-    "Illegal Action, must have a user!"
-  );
+  invariant(typeof user?.userId === "string", "Illegal Action, must have a user!");
 
   await prisma.cart.upsert({
     where: { userId_ticketId: { ticketId, userId: user.userId } },
@@ -55,22 +52,15 @@ export default function WebinarDetails() {
         </div>
         <div>
           <h3>
-            Hosted by{" "}
-            <span className="font-semibold">{webinar?.seller.name}</span>
+            Hosted by <span className="font-semibold">{webinar?.seller.name}</span>
           </h3>
         </div>
         <div className="w-full">
           <h3 className="text-lg font-semibold mb-2">Schedules</h3>
           {webinar && (
             <div className="w-full flex items-center gap-10 mb-6">
-              <ScheduleItem
-                title="Registration Open"
-                dateString={webinar.registrationOpen}
-              />
-              <ScheduleItem
-                title="Registration Closed"
-                dateString={webinar.registrationClosed}
-              />
+              <ScheduleItem title="Registration Open" dateString={webinar.registrationOpen} />
+              <ScheduleItem title="Registration Closed" dateString={webinar.registrationClosed} />
               <ScheduleItem title="Start Date" dateString={webinar.startDate} />
             </div>
           )}
@@ -86,13 +76,7 @@ export default function WebinarDetails() {
   );
 }
 
-const ScheduleItem = ({
-  title,
-  dateString,
-}: {
-  title: string;
-  dateString: string;
-}) => {
+const ScheduleItem = ({ title, dateString }: { title: string; dateString: string }) => {
   return (
     <div>
       <h4 className="font-medium">{title}</h4>
@@ -109,14 +93,8 @@ const TicketSelect = ({ tickets }: { tickets: Ticket[] }) => {
 
   return (
     <fetcher.Form method="post" className="space-y-6">
-      <RadioGroup
-        name="ticket-id"
-        defaultValue={tickets[0].id}
-        className="space-y-2"
-      >
-        <RadioGroup.Label className="text-lg font-semibold">
-          Tickets
-        </RadioGroup.Label>
+      <RadioGroup name="ticket-id" defaultValue={tickets[0].id} className="space-y-2">
+        <RadioGroup.Label className="text-lg font-semibold">Tickets</RadioGroup.Label>
         <div className="grid md:grid-cols-2 gap-x-4">
           {ticketPriceAscending.map((t) => {
             return (
@@ -140,10 +118,7 @@ const TicketSelect = ({ tickets }: { tickets: Ticket[] }) => {
           })}
         </div>
       </RadioGroup>
-      <button
-        className="w-full bg-black text-white py-2 rounded-md"
-        disabled={isBusy}
-      >
+      <button className="w-full bg-black text-white py-2 rounded-md" disabled={isBusy}>
         Add to cart
       </button>
     </fetcher.Form>
