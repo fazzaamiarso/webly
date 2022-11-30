@@ -19,6 +19,7 @@ import clsx from "clsx";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { useSpinDelay } from "spin-delay";
 import { prisma } from "~/lib/prisma.server";
 import type { loader as SearchLoader } from "~/routes/api/autocomplete";
 import { authenticator } from "~/utils/auth.server";
@@ -148,6 +149,9 @@ const SearchAutocomplete = () => {
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState("");
 
+  const isBusy = webinarFetcher.state !== "idle";
+  const showSpinner = useSpinDelay(isBusy, { delay: 150, minDuration: 500 });
+
   const onSelect = (value: { name: string; type: string }) => {
     if (!value) return;
     searchParams.delete("q");
@@ -181,6 +185,7 @@ const SearchAutocomplete = () => {
                 className="w-full relative bg-[#f3f3f6] border-none py-3 rounded-sm focus-within:ring-2"
                 onChange={onInputChange}
               />
+
               <Combobox.Options className="absolute bottom-0 left-0 w-full z-50 rounded-md translate-y-[105%] bg-white shadow-lg p-4 space-y-2">
                 {webinars.map((w) => {
                   return (
@@ -213,12 +218,32 @@ const SearchAutocomplete = () => {
           );
         }}
       </Combobox>
-      <button
-        type="submit"
-        className="flex items-center absolute z-10 right-0 px-4 bottom-0 -translate-y-1/2 "
-      >
-        <MagnifyingGlassIcon className="h-6 w-6 " aria-hidden="true" />
-      </button>
+      {showSpinner ? (
+        <div className="absolute z-10 right-0 px-4 bottom-0 -translate-y-1/2">
+          <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+              opacity=".25"
+            />
+            <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z">
+              <animateTransform
+                attributeName="transform"
+                type="rotate"
+                dur="0.75s"
+                values="0 12 12;360 12 12"
+                repeatCount="indefinite"
+              />
+            </path>
+          </svg>
+        </div>
+      ) : (
+        <button
+          type="submit"
+          className="flex items-center absolute z-10 right-0 px-4 bottom-0 -translate-y-1/2 "
+        >
+          <MagnifyingGlassIcon className="h-6 w-6 " aria-hidden="true" />
+        </button>
+      )}
     </Form>
   );
 };

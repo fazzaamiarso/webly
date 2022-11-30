@@ -11,16 +11,16 @@ import { WebinarItem } from "~/components/webinar-item";
 import { mongoClient } from "~/lib/mongodb.server";
 import { capitalize } from "~/utils/display";
 
-const webinarSearchSchema = z
-  .object({
-    _id: z.any(),
-    name: z.string(),
-    type: z.nativeEnum(TicketType),
-    startDate: z.date(),
-    category: z.nativeEnum(Category),
-    coverImg: z.string(),
-  })
-  .passthrough();
+const webinarSearchSchema = z.object({
+  _id: z.any(),
+  name: z.string(),
+  type: z.nativeEnum(TicketType),
+  startDate: z.date(),
+  category: z.nativeEnum(Category),
+  coverImg: z.string(),
+  sellerName: z.string(),
+  tickets: z.array(z.object({ price: z.number() })),
+});
 
 const sorter = [
   { name: "Most Relevant", value: "MOST_RELEVANT" },
@@ -294,7 +294,7 @@ export default function Search() {
             </select>
           </div>
           <ul className="w-full pt-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-6 gap-y-8">
-            {webinars.map((w: any) => (
+            {webinars.map((w) => (
               <WebinarItem
                 key={w._id.toString()}
                 id={w._id.toString()}
