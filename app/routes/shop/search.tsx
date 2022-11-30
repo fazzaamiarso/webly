@@ -6,9 +6,21 @@ import { Form, useLoaderData, useSearchParams, useSubmit } from "@remix-run/reac
 import type { ReactNode } from "react";
 import { Fragment } from "react";
 import { useId, useState } from "react";
+import { z } from "zod";
 import { WebinarItem } from "~/components/webinar-item";
 import { mongoClient } from "~/lib/mongodb.server";
 import { capitalize } from "~/utils/display";
+
+const webinarSearchSchema = z
+  .object({
+    _id: z.any(),
+    name: z.string(),
+    type: z.nativeEnum(TicketType),
+    startDate: z.date(),
+    category: z.nativeEnum(Category),
+    coverImg: z.string(),
+  })
+  .passthrough();
 
 const sorter = [
   { name: "Most Relevant", value: "MOST_RELEVANT" },
@@ -115,6 +127,17 @@ export const loader = async ({ request }: LoaderArgs) => {
       foreignField: "webinarId",
       as: "tickets",
     }),
+    {
+      $project: {
+        name: 1,
+        type: 1,
+        startDate: 1,
+        category: 1,
+        coverImg: 1,
+        sellerName: "$seller.name",
+        tickets: 1,
+      },
+    },
   ];
 
   const pipeline = searchIntent === "webinar" ? webinarPipeline : sellerPipeline;
@@ -141,6 +164,30 @@ export const loader = async ({ request }: LoaderArgs) => {
     );
   }
 
+  if (searchIntent === "seller") {
+    pipeline.push(
+      { $unwind: "$webinars" },
+      lookup({
+        from: "Ticket",
+        localField: "webinars._id",
+        foreignField: "webinarId",
+        as: "tickets",
+      }),
+      {
+        $project: {
+          _id: "$webinars._id",
+          name: "$webinars.name",
+          type: "$webinars.type",
+          startDate: "$webinars.startDate",
+          category: "$webinars.category",
+          coverImg: "$webinars.coverImg",
+          sellerName: "$name",
+          tickets: "$tickets",
+        },
+      }
+    );
+  }
+
   if (sort === "NEWEST") {
     pipeline.push({ $sort: { startDate: 1 } });
   }
@@ -158,10 +205,9 @@ export const loader = async ({ request }: LoaderArgs) => {
     .aggregate(pipeline)
     .toArray();
 
-  return json(results);
+  const parsed = z.array(webinarSearchSchema).parse(results);
+  return json(parsed);
 };
-
-
 
 export default function Search() {
   const submit = useSubmit();
@@ -250,13 +296,13 @@ export default function Search() {
           <ul className="w-full pt-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-6 gap-y-8">
             {webinars.map((w: any) => (
               <WebinarItem
-                key={w._id}
-                id={w._id}
+                key={w._id.toString()}
+                id={w._id.toString()}
                 cover={w.coverImg}
                 name={w.name}
                 startDate={w.startDate}
                 tickets={w.tickets}
-                seller={w.seller[0].name}
+                seller={w.sellerName}
               />
             ))}
           </ul>
