@@ -58,7 +58,7 @@ export default function WebinarDetails() {
         <div className="w-full">
           <h3 className="text-lg font-semibold mb-2">Schedules</h3>
           {webinar && (
-            <div className="w-full flex items-center gap-10 mb-6">
+            <div className="w-full grid grid-cols-2 items-center gap-6 mb-6">
               <ScheduleItem title="Registration Open" dateString={webinar.registrationOpen} />
               <ScheduleItem title="Registration Closed" dateString={webinar.registrationClosed} />
               <ScheduleItem title="Start Date" dateString={webinar.startDate} />
@@ -88,7 +88,7 @@ const ScheduleItem = ({ title, dateString }: { title: string; dateString: string
 const TicketSelect = ({ tickets }: { tickets: Ticket[] }) => {
   const fetcher = useFetcher();
 
-  const isBusy = fetcher.state === "submitting";
+  const isBusy = fetcher.state !== "idle";
   const ticketPriceAscending = tickets.sort((a, b) => a.price - b.price);
 
   return (
@@ -112,7 +112,7 @@ const TicketSelect = ({ tickets }: { tickets: Ticket[] }) => {
                   {t.price === 0 ? "Free" : `$${t.price}`}
                 </div>
                 <p className="text-sm">{t.description}</p>
-                <div className="text-sm">{t.stock} left in stock</div>
+                <div className="text-sm">{t.stock} tickets left</div>
               </RadioGroup.Option>
             );
           })}

@@ -1,13 +1,8 @@
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { Category } from "@prisma/client";
+import { Category, TicketType } from "@prisma/client";
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import {
-  Form,
-  useLoaderData,
-  useSearchParams,
-  useSubmit,
-} from "@remix-run/react";
+import { Form, useLoaderData, useSearchParams, useSubmit } from "@remix-run/react";
 import type { ReactNode } from "react";
 import { Fragment } from "react";
 import { useId, useState } from "react";
@@ -22,13 +17,60 @@ const sorter = [
 type SorterValues = typeof sorter[number]["value"];
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const query = new URL(request.url).searchParams.get("q");
-  const pricingType = new URL(request.url).searchParams.getAll("price");
-  const sort: SorterValues = (new URL(request.url).searchParams.get("sort") ??
-    "MOST_RELEVANT") as SorterValues;
-  const categories = new URL(request.url).searchParams.getAll("category");
+  const searchParams = new URL(request.url).searchParams;
+  const query = searchParams.get("q");
+  const pricingType = searchParams.getAll("price");
+  const sort: SorterValues = (searchParams.get("sort") ?? "MOST_RELEVANT") as SorterValues;
+  const categories = searchParams.getAll("category");
+  const searchIntent = searchParams.get("intent") ?? "webinar";
 
-  let pipeline: any = [
+  const sellerPipeline = [
+    {
+      $search: {
+        index: "seller-autocomplete",
+        compound: {
+          must: [],
+          should: [],
+          filter: [],
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "Webinar",
+        localField: "_id",
+        foreignField: "sellerId",
+        as: "webinars",
+        pipeline: [
+          {
+            $match: {
+              $and: [
+                {
+                  $expr: {
+                    $in: ["$category", categories.length ? categories : Object.keys(Category)],
+                  },
+                },
+                {
+                  $expr: {
+                    $in: [
+                      "$type",
+                      pricingType.length
+                        ? pricingType.length === 2
+                          ? [...pricingType, "MIX"]
+                          : pricingType
+                        : Object.keys(TicketType),
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ];
+
+  let webinarPipeline: any = [
     {
       $search: {
         compound: {
@@ -56,47 +98,77 @@ export const loader = async ({ request }: LoaderArgs) => {
     },
   ];
 
-  if (pricingType.length)
-    pipeline[0].$search.compound.filter.push({
-      text: {
-        query: pricingType.length === 2 ? [...pricingType, "MIX"] : pricingType,
-        path: "type",
-      },
-    });
+  const pipeline = searchIntent === "webinar" ? webinarPipeline : sellerPipeline;
 
   if (query?.length) {
-    pipeline[0].$search.compound.should.push({
+    pipeline[0].$search.compound.must.push({
       text: {
         query,
         path: ["name"],
         fuzzy: {},
       },
     });
-    pipeline[0].$search.compound.should.push(
+
+    if (searchIntent === "webinar") {
+      if (pricingType.length)
+        pipeline[0].$search.compound.filter.push({
+          text: {
+            query: pricingType.length === 2 ? [...pricingType, "MIX"] : pricingType,
+            path: "type",
+          },
+        });
+
+      if (categories.length) {
+        pipeline[0].$search.compound.filter.push({
+          text: {
+            query: categories,
+            path: ["category"],
+          },
+        });
+      }
+      pipeline[0].$search.compound.should.push(
+        {
+          text: {
+            query,
+            path: ["category"],
+            fuzzy: {},
+          },
+        },
+        {
+          regex: {
+            allowAnalyzedField: true,
+            query: `*${query}*`,
+            path: "name",
+          },
+        }
+      );
+    }
+  }
+
+  if (searchIntent === "seller") {
+    pipeline.push(
       {
-        text: {
-          query,
-          path: ["category"],
-          fuzzy: {},
+        $unwind: "$webinars",
+      },
+      {
+        $lookup: {
+          from: "Ticket",
+          localField: "webinars._id",
+          foreignField: "webinarId",
+          as: "tickets",
         },
       },
       {
-        regex: {
-          allowAnalyzedField: true,
-          query: `*${query}*`,
-          path: "name",
+        $project: {
+          _id: "$webinars._id",
+          name: "$webinars.name",
+          startDate: "$webinars.startDate",
+          coverImg: "$webinars.coverImg",
+          seller: [{ name: "$name" }],
+          tickets: 1,
         },
       }
     );
-  }
-
-  if (categories.length) {
-    pipeline[0].$search.compound.filter.push({
-      text: {
-        query: categories,
-        path: "category",
-      },
-    });
   }
 
   if (sort === "NEWEST") {
@@ -111,7 +183,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 
   const results = await(await mongoClient)
     .db("webinar-app")
-    .collection("Webinar")
+    .collection(searchIntent === "webinar" ? "Webinar" : "Seller")
     .aggregate(pipeline)
     .toArray();
 
@@ -135,6 +207,12 @@ export default function Search() {
           <Form className="w-full" onChange={(e) => submit(e.currentTarget)}>
             <h2 className="font-semibold text-lg mb-6">Filters</h2>
             <input type="text" hidden defaultValue={searchParams.get("q") ?? ""} name="q" />
+            <input
+              type="text"
+              hidden
+              defaultValue={searchParams.get("intent") ?? "webinar"}
+              name="intent"
+            />
             <FilterWrapper fieldName="category" title="Categories">
               {({ isOpen }) =>
                 isOpen && (

@@ -149,13 +149,13 @@ const SearchAutocomplete = () => {
   const [query, setQuery] = useState("");
 
   const onSelect = (value: unknown) => {
-    if (!value || typeof value !== "string") return;
+    if (!value) return;
     searchParams.delete("q");
+    searchParams.delete("intent");
+    searchParams.append("q", value.name);
+    searchParams.append("intent", value.type);
 
-    const currParams = Array.from(searchParams.entries());
-    const newParams = Object.entries({ q: value });
-
-    submit(new URLSearchParams([...currParams, ...newParams]), {
+    submit(searchParams, {
       action: searchPath,
     });
   };
@@ -186,7 +186,7 @@ const SearchAutocomplete = () => {
                   return (
                     <Combobox.Option
                       key={w._id}
-                      value={w.name}
+                      value={w}
                       className={({ active }) => clsx("rounded-sm p-2", active && "bg-[#f3f3f6]")}
                     >
                       {w.name}{" "}

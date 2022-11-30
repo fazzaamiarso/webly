@@ -1,6 +1,6 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { Form, Link, useLoaderData, useTransition } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { prisma } from "~/lib/prisma.server";
 import { authenticator } from "~/utils/auth.server";
@@ -37,10 +37,7 @@ export const action = async ({ request }: ActionArgs) => {
 
   invariant(typeof ticketId === "string", "ticketId must be a string!");
   invariant(typeof quantity === "string", "quantity must be a string!");
-  invariant(
-    typeof savedUser?.userId === "string",
-    "Illegal that user is not exist!"
-  );
+  invariant(typeof savedUser?.userId === "string", "Illegal that user is not exist!");
 
   console.log(quantity);
   if (Number(quantity) <= 1) {
@@ -59,6 +56,8 @@ export const action = async ({ request }: ActionArgs) => {
 
 export default function Cart() {
   const cart = useLoaderData<typeof loader>();
+  const transition = useTransition();
+  const isBusy = transition.state !== "idle";
   return (
     <main className="w-11/12 max-w-2xl mx-auto py-12">
       <section className="w-full space-y-8">
@@ -102,6 +101,7 @@ export default function Cart() {
                       <button
                         name="ticket-id"
                         value={c.ticketId}
+                        disabled={isBusy}
                         className="text-blue-500 text-sm"
                       >
                         Remove
@@ -119,16 +119,10 @@ export default function Cart() {
           <div className="w-full flex items-center">
             <p className="text-lg">Subtotal</p>
             <div className="ml-auto text-lg">
-              $
-              {cart.reduce(
-                (acc, curr) => acc + curr.quantity * curr.Ticket.price,
-                0
-              )}
+              ${cart.reduce((acc, curr) => acc + curr.quantity * curr.Ticket.price, 0)}
             </div>
           </div>
-          <button className="w-full bg-black text-white p-2 rounded-md">
-            Checkout
-          </button>
+          <button className="w-full bg-black text-white p-2 rounded-md">Checkout</button>
           <p className="text-center">
             or{" "}
             <Link to="/shop" className="text-blue-500 text-sm">
