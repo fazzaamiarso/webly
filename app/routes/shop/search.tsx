@@ -8,6 +8,7 @@ import { Fragment } from "react";
 import { useId, useState } from "react";
 import { WebinarItem } from "~/components/webinar-item";
 import { mongoClient } from "~/lib/mongodb.server";
+import { capitalize } from "~/utils/display";
 
 const sorter = [
   { name: "Most Relevant", value: "MOST_RELEVANT" },
@@ -16,6 +17,20 @@ const sorter = [
 ] as const;
 type SorterValues = typeof sorter[number]["value"];
 
+type AggLookup = {
+  from: string;
+  localField: string;
+  foreignField: string;
+  as: string;
+  pipeline?: {}[];
+};
+const lookup = (obj: AggLookup) => {
+  return { $lookup: obj } as const;
+};
+
+const searchOperator = (operator: "text" | "regex" | "wildcard", option: Record<string, any>) => {
+  return { [operator]: option };
+};
 export const loader = async ({ request }: LoaderArgs) => {
   const searchParams = new URL(request.url).searchParams;
   const query = searchParams.get("q");
@@ -23,6 +38,14 @@ export const loader = async ({ request }: LoaderArgs) => {
   const sort: SorterValues = (searchParams.get("sort") ?? "MOST_RELEVANT") as SorterValues;
   const categories = searchParams.getAll("category");
   const searchIntent = searchParams.get("intent") ?? "webinar";
+
+  const priceFilter = pricingType.length
+    ? pricingType.length === 2
+      ? [...pricingType, "MIX"]
+      : pricingType
+    : Object.keys(TicketType);
+
+  const categoryFilter = categories.length ? categories : Object.keys(Category);
 
   const sellerPipeline = [
     {
@@ -35,39 +58,30 @@ export const loader = async ({ request }: LoaderArgs) => {
         },
       },
     },
-    {
-      $lookup: {
-        from: "Webinar",
-        localField: "_id",
-        foreignField: "sellerId",
-        as: "webinars",
-        pipeline: [
-          {
-            $match: {
-              $and: [
-                {
-                  $expr: {
-                    $in: ["$category", categories.length ? categories : Object.keys(Category)],
-                  },
+    lookup({
+      from: "Webinar",
+      localField: "_id",
+      foreignField: "sellerId",
+      as: "webinars",
+      pipeline: [
+        {
+          $match: {
+            $and: [
+              {
+                $expr: {
+                  $in: ["$category", categoryFilter],
                 },
-                {
-                  $expr: {
-                    $in: [
-                      "$type",
-                      pricingType.length
-                        ? pricingType.length === 2
-                          ? [...pricingType, "MIX"]
-                          : pricingType
-                        : Object.keys(TicketType),
-                    ],
-                  },
+              },
+              {
+                $expr: {
+                  $in: ["$type", priceFilter],
                 },
-              ],
-            },
+              },
+            ],
           },
-        ],
-      },
-    },
+        },
+      ],
+    }),
   ];
 
   let webinarPipeline: any = [
@@ -76,98 +90,54 @@ export const loader = async ({ request }: LoaderArgs) => {
         compound: {
           must: [],
           should: [],
-          filter: [],
+          filter: [
+            searchOperator("text", {
+              query: categoryFilter,
+              path: "category",
+            }),
+            searchOperator("text", {
+              query: priceFilter,
+              path: "type",
+            }),
+          ],
         },
       },
     },
-    {
-      $lookup: {
-        from: "Seller",
-        localField: "sellerId",
-        foreignField: "_id",
-        as: "seller",
-      },
-    },
-    {
-      $lookup: {
-        from: "Ticket",
-        localField: "_id",
-        foreignField: "webinarId",
-        as: "tickets",
-      },
-    },
+    lookup({
+      from: "Seller",
+      localField: "sellerId",
+      foreignField: "_id",
+      as: "seller",
+    }),
+    lookup({
+      from: "Ticket",
+      localField: "_id",
+      foreignField: "webinarId",
+      as: "tickets",
+    }),
   ];
 
   const pipeline = searchIntent === "webinar" ? webinarPipeline : sellerPipeline;
 
   if (query?.length) {
-    pipeline[0].$search.compound.must.push({
-      text: {
+    pipeline[0].$search.compound.must.push(
+      searchOperator("text", {
         query,
-        path: ["name"],
+        path: "name",
         fuzzy: {},
-      },
-    });
-
-    if (searchIntent === "webinar") {
-      if (pricingType.length)
-        pipeline[0].$search.compound.filter.push({
-          text: {
-            query: pricingType.length === 2 ? [...pricingType, "MIX"] : pricingType,
-            path: "type",
-          },
-        });
-
-      if (categories.length) {
-        pipeline[0].$search.compound.filter.push({
-          text: {
-            query: categories,
-            path: ["category"],
-          },
-        });
-      }
-      pipeline[0].$search.compound.should.push(
-        {
-          text: {
-            query,
-            path: ["category"],
-            fuzzy: {},
-          },
-        },
-        {
-          regex: {
-            allowAnalyzedField: true,
-            query: `*${query}*`,
-            path: "name",
-          },
-        }
-      );
-    }
-  }
-
-  if (searchIntent === "seller") {
-    pipeline.push(
-      {
-        $unwind: "$webinars",
-      },
-      {
-        $lookup: {
-          from: "Ticket",
-          localField: "webinars._id",
-          foreignField: "webinarId",
-          as: "tickets",
-        },
-      },
-      {
-        $project: {
-          _id: "$webinars._id",
-          name: "$webinars.name",
-          startDate: "$webinars.startDate",
-          coverImg: "$webinars.coverImg",
-          seller: [{ name: "$name" }],
-          tickets: 1,
-        },
-      }
+      })
+    );
+    pipeline[0].$search.compound.should.push(
+      searchOperator("text", {
+        query,
+        path: "category",
+        fuzzy: {},
+      }),
+      searchOperator("regex", {
+        allowAnalyzedField: true,
+        query: `*${query}*`,
+        path: "name",
+      })
     );
   }
 
@@ -181,18 +151,17 @@ export const loader = async ({ request }: LoaderArgs) => {
   }
   if (Object.keys(compound).length === 0) pipeline.shift();
 
+  const collection = searchIntent === "webinar" ? "Webinar" : "Seller";
   const results = await(await mongoClient)
     .db("webinar-app")
-    .collection(searchIntent === "webinar" ? "Webinar" : "Seller")
+    .collection(collection)
     .aggregate(pipeline)
     .toArray();
 
   return json(results);
 };
 
-const capitalize = (str: string) => {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-};
+
 
 export default function Search() {
   const submit = useSubmit();

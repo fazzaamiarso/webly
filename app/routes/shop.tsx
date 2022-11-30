@@ -148,7 +148,7 @@ const SearchAutocomplete = () => {
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState("");
 
-  const onSelect = (value: unknown) => {
+  const onSelect = (value: { name: string; type: string }) => {
     if (!value) return;
     searchParams.delete("q");
     searchParams.delete("intent");
