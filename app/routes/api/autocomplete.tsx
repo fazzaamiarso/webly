@@ -1,12 +1,21 @@
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
+import { z } from "zod";
 import { mongoClient } from "~/lib/mongodb.server";
+
+const autocompleteSchema = z.array(
+  z.object({
+    _id: z.any(),
+    name: z.string(),
+    type: z.enum(["webinar", "seller"]),
+    score: z.number(),
+  })
+);
 
 export const loader = async ({ request }: LoaderArgs) => {
   const query = new URL(request.url).searchParams.get("q");
-
   const connection = await mongoClient;
-  const results = await connection
+  const webinarResults = await connection
     .db("webinar-app")
     .collection("Webinar")
     .aggregate([
@@ -48,7 +57,6 @@ export const loader = async ({ request }: LoaderArgs) => {
       { $limit: 5 },
       {
         $project: {
-          _id: 1,
           name: 1,
           type: 1,
           score: {
@@ -102,7 +110,6 @@ export const loader = async ({ request }: LoaderArgs) => {
       { $limit: 5 },
       {
         $project: {
-          _id: 1,
           name: 1,
           type: 1,
           score: {
@@ -113,5 +120,8 @@ export const loader = async ({ request }: LoaderArgs) => {
     ])
     .toArray();
 
-  return json([...results, ...sellerResults].sort((a, b) => b.score - a.score));
+  const searchResults = autocompleteSchema.parse([...webinarResults, ...sellerResults]);
+
+  // sort score descending
+  return json(searchResults.sort((a, b) => b.score - a.score));
 };

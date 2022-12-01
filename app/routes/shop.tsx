@@ -21,7 +21,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useSpinDelay } from "spin-delay";
 import { prisma } from "~/lib/prisma.server";
-import type { loader as SearchLoader } from "~/routes/api/autocomplete";
+import type { loader as autocompleteLoader } from "~/routes/api/autocomplete";
 import { authenticator } from "~/utils/auth.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
@@ -143,7 +143,7 @@ export default function ShopLayout() {
 const SearchAutocomplete = () => {
   const searchPath = "/shop/search";
   const submit = useSubmit();
-  const webinarFetcher = useFetcher<typeof SearchLoader>();
+  const webinarFetcher = useFetcher<typeof autocompleteLoader>();
   const webinars = webinarFetcher.data ?? [];
 
   const [searchParams] = useSearchParams();
@@ -220,7 +220,13 @@ const SearchAutocomplete = () => {
       </Combobox>
       {showSpinner ? (
         <div className="absolute z-10 right-0 px-4 bottom-0 -translate-y-1/2">
-          <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
             <path
               d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
               opacity=".25"
