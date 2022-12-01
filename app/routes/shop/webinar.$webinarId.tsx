@@ -1,4 +1,3 @@
-import { RadioGroup } from "@headlessui/react";
 import { VideoCameraIcon } from "@heroicons/react/24/outline";
 import type { Ticket } from "@prisma/client";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
@@ -10,14 +9,23 @@ import invariant from "tiny-invariant";
 import { prisma } from "~/lib/prisma.server";
 import { authenticator } from "~/utils/auth.server";
 
-export const loader = async ({ params }: LoaderArgs) => {
+export const loader = async ({ request, params }: LoaderArgs) => {
+  const user = await authenticator.isAuthenticated(request);
+
   invariant(params.webinarId, `Expected ${params.webinarId}!`);
+  invariant(typeof user?.userId === "string", "Illegal Action, must have a user!");
+
   const webinar = await prisma.webinar.findUnique({
     where: { id: params.webinarId },
     include: { Tickets: true, seller: { select: { name: true } } },
   });
 
-  return json(webinar);
+  const cart = await prisma.cart.findMany({
+    where: { userId: user.userId },
+    select: { quantity: true, ticketId: true },
+  });
+
+  return json({ webinar, cart });
 };
 
 export const action = async ({ request }: ActionArgs) => {
@@ -38,7 +46,7 @@ export const action = async ({ request }: ActionArgs) => {
 };
 
 export default function WebinarDetails() {
-  const webinar = useLoaderData<typeof loader>();
+  const { webinar, cart } = useLoaderData<typeof loader>();
 
   return (
     <main className="w-11/12 mx-auto space-y-12 md:space-y-0 md:grid md:grid-cols-2 md:gap-8 pt-8">
@@ -65,7 +73,7 @@ export default function WebinarDetails() {
             </div>
           )}
         </div>
-        <TicketSelect tickets={webinar?.Tickets ?? []} />
+        <TicketSelect tickets={webinar?.Tickets ?? []} cart={cart ?? []} />
       </section>
       <section className="">
         <div className="">
@@ -85,40 +93,52 @@ const ScheduleItem = ({ title, dateString }: { title: string; dateString: string
   );
 };
 
-const TicketSelect = ({ tickets }: { tickets: Ticket[] }) => {
+const TicketSelect = ({
+  tickets,
+  cart,
+}: {
+  tickets: Ticket[];
+  cart: { quantity: number; ticketId: string }[];
+}) => {
   const fetcher = useFetcher();
 
   const isBusy = fetcher.state !== "idle";
   const ticketPriceAscending = tickets.sort((a, b) => a.price - b.price);
 
   return (
-    <fetcher.Form method="post" className="space-y-6">
-      <RadioGroup name="ticket-id" defaultValue={tickets[0].id} className="space-y-2">
-        <RadioGroup.Label className="text-lg font-semibold">Tickets</RadioGroup.Label>
-        <div className="grid md:grid-cols-2 gap-x-4">
-          {ticketPriceAscending.map((t) => {
-            return (
-              <RadioGroup.Option
-                key={t.id}
-                value={t.id}
-                className={({ checked }) =>
-                  clsx(
-                    "p-4 rounded-md ring-1 w-full space-y-2 self-stretch cursor-pointer ",
-                    checked ? "ring-gray-700 ring-2" : "ring-gray-400"
-                  )
-                }
-              >
+    <ul className="grid md:grid-cols-2 gap-x-4 items-start">
+      {ticketPriceAscending.map((t) => {
+        const ticketInCart = cart.find((c) => c.ticketId === t.id)?.quantity ?? 0;
+        const canAddToCart = ticketInCart < t.stock;
+        return (
+          <li
+            key={t.id}
+            className="p-4 rounded-md ring-1 ring-gray-400 w-full space-y-2 self-stretch cursor-pointer"
+          >
+            <fetcher.Form
+              replace
+              method="post"
+              className="flex flex-col justify-between h-full gap-6"
+            >
+              <input type="text" hidden defaultValue={t.id} name="ticket-id" />
+              <div>
                 <div className="font-semibold">{t.price === 0 ? "Free" : `$${t.price}`}</div>
                 <p className="text-sm pb-2">{t.description}</p>
                 <div className="text-sm font-semibold">{t.stock} tickets left</div>
-              </RadioGroup.Option>
-            );
-          })}
-        </div>
-      </RadioGroup>
-      <button className="w-full bg-black text-white py-2 rounded-md" disabled={isBusy}>
-        Add to cart
-      </button>
-    </fetcher.Form>
+              </div>
+              <button
+                className={clsx(
+                  "w-full bg-black text-white py-2 rounded-md disabled:cursor-not-allowed",
+                  !canAddToCart && "opacity-50"
+                )}
+                disabled={!canAddToCart || isBusy}
+              >
+                Add to cart
+              </button>
+            </fetcher.Form>
+          </li>
+        );
+      })}
+    </ul>
   );
 };

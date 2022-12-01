@@ -18,7 +18,14 @@ export const loader = async ({ request }: LoaderArgs) => {
           Ticket: {
             select: {
               price: true,
-              Webinar: { select: { name: true, coverImg: true, id: true } },
+              Webinar: {
+                select: {
+                  name: true,
+                  coverImg: true,
+                  id: true,
+                  seller: { select: { name: true } },
+                },
+              },
             },
           },
         },
@@ -80,7 +87,7 @@ export default function Cart() {
                     <div className="flex">
                       <div>
                         <h3 className="font-semibold">{c.Ticket.Webinar.name}</h3>
-                        <p className="">Webinar Host</p>
+                        <p className="">{c.Ticket.Webinar.seller.name}</p>
                       </div>
                       <div className="ml-auto space-x-4">
                         <span className="">{c.quantity} x </span>
@@ -89,7 +96,7 @@ export default function Cart() {
                         </span>
                       </div>
                     </div>
-                    <Form method="post" className="ml-auto">
+                    <Form replace method="post" className="ml-auto">
                       <input
                         key={c.quantity}
                         type="number"
