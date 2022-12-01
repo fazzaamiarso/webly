@@ -26,10 +26,7 @@ export default function Signin() {
             </Link>
           </p>
         </div>
-        <Form
-          method="post"
-          className="space-y-6 ring-1 p-8 rounded-md ring-black w-full"
-        >
+        <Form method="post" className="space-y-6 ring-1 p-8 rounded-md ring-gray-300 w-full">
           <input type="text" hidden name="auth-type" defaultValue="signin" />
           <div className="">
             <label htmlFor="email">Email address</label>
@@ -37,7 +34,7 @@ export default function Signin() {
               type="text"
               id="email"
               name="email"
-              className="w-full block rounded-md"
+              className="w-full block rounded-md border-gray-400"
             />
           </div>
           <div className="">
@@ -46,7 +43,7 @@ export default function Signin() {
               type="password"
               id="password"
               name="password"
-              className="w-full block rounded-md"
+              className="w-full block rounded-md border-gray-400"
             />
           </div>
           <div className="flex w-full justify-between">
@@ -65,9 +62,7 @@ export default function Signin() {
               Forgot your password?
             </button>
           </div>
-          <button className="w-full bg-black text-white p-2 rounded-md">
-            Sign in
-          </button>
+          <button className="w-full bg-black text-white p-2 rounded-md">Sign in</button>
         </Form>
       </div>
     </main>

@@ -200,13 +200,12 @@ export const loader = async ({ request }: LoaderArgs) => {
   if (Object.keys(compound).length === 0) pipeline.shift();
 
   const collection = searchIntent === "webinar" ? "Webinar" : "Seller";
-  const results = await(await mongoClient)
+  const results = await (await mongoClient)
     .db("webinar-app")
     .collection(collection)
     .aggregate(pipeline)
     .toArray();
 
-  console.log(results);
   const parsed = z.array(webinarSearchSchema).parse(results);
   return json(parsed);
 };
@@ -233,7 +232,7 @@ export default function Search() {
             <FilterWrapper fieldName="category" title="Categories">
               {({ isOpen }) =>
                 isOpen && (
-                  <div className="space-y-3 pt-4">
+                  <div className="space-y-3 py-4">
                     {Object.keys(Category).map((c) => (
                       <FilterCheckbox
                         key={c}
@@ -259,7 +258,7 @@ export default function Search() {
             <FilterWrapper fieldName="price" title="Price">
               {({ isOpen }) =>
                 isOpen && (
-                  <div className="space-y-3 pt-4">
+                  <div className="space-y-3 py-4">
                     <FilterCheckbox defaultValue="FREE" fieldName="price" displayValue="Free" />
                     <FilterCheckbox defaultValue="PAID" fieldName="price" displayValue="Paid" />
                   </div>

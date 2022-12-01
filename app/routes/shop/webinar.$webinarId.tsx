@@ -79,7 +79,7 @@ export default function WebinarDetails() {
 const ScheduleItem = ({ title, dateString }: { title: string; dateString: string }) => {
   return (
     <div>
-      <h4 className="font-medium">{title}</h4>
+      <h4 className="font-semibold">{title}</h4>
       <div>{dayjs(dateString).format("D MMMM YYYY")}</div>
     </div>
   );
@@ -103,16 +103,14 @@ const TicketSelect = ({ tickets }: { tickets: Ticket[] }) => {
                 value={t.id}
                 className={({ checked }) =>
                   clsx(
-                    "p-4 rounded-md ring-1 w-full space-y-2 self-stretch cursor-pointer",
-                    checked ? "ring-purple-600 ring-2" : "ring-black"
+                    "p-4 rounded-md ring-1 w-full space-y-2 self-stretch cursor-pointer ",
+                    checked ? "ring-gray-700 ring-2" : "ring-gray-400"
                   )
                 }
               >
-                <div className="font-semibold text-lg">
-                  {t.price === 0 ? "Free" : `$${t.price}`}
-                </div>
-                <p className="text-sm">{t.description}</p>
-                <div className="text-sm">{t.stock} tickets left</div>
+                <div className="font-semibold">{t.price === 0 ? "Free" : `$${t.price}`}</div>
+                <p className="text-sm pb-2">{t.description}</p>
+                <div className="text-sm font-semibold">{t.stock} tickets left</div>
               </RadioGroup.Option>
             );
           })}

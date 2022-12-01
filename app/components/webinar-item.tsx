@@ -32,19 +32,15 @@ export const WebinarItem = ({
             className="bg-cover bg-center bg-no-repeat hover:scale-110 transition-all duration-500"
           />
         </div>
-        <div className="flex w-full justify-between ">
-          <div className="">
-            <p className="font-medium text-sm md:text-base line-clamp-1">
-              {name}
-            </p>
-            <p className="text-sm ">{seller}</p>
+        <div className="flex w-full justify-between">
+          <div className="mb-4">
+            <p className="font-semibold text-sm md:text-base line-clamp-1">{name}</p>
+            <p className="text-sm text-gray-600">{seller}</p>
           </div>
         </div>
         <div className="w-full flex">
           <div className="text-sm md:text-base font-medium">{priceText}</div>
-          <div className="text-sm ml-auto">
-            {dayjs(startDate).format("D MMM")}
-          </div>
+          <div className="text-sm ml-auto">{dayjs(startDate).format("D MMM")}</div>
         </div>
       </Link>
     </li>

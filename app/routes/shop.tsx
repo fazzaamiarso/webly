@@ -20,6 +20,7 @@ import type { ChangeEvent } from "react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useSpinDelay } from "spin-delay";
+import { Footer } from "~/components/footer";
 import { prisma } from "~/lib/prisma.server";
 import type { loader as autocompleteLoader } from "~/routes/api/autocomplete";
 import { authenticator } from "~/utils/auth.server";
@@ -48,8 +49,8 @@ export default function ShopLayout() {
 
   return (
     <>
-      <header className="w-full border-b-[1px] border-black mb-4 relative z-10 bg-white">
-        <div className="bg-[#111828] py-2">
+      <header className="w-full border-b-[2px] border-gray-200 mb-4 relative z-10 bg-white">
+        <div className="bg-primary py-2">
           <div className="w-11/12 mx-auto flex items-center">
             {user.email ? (
               <div className="ml-auto space-x-8 flex items-center">
@@ -72,7 +73,7 @@ export default function ShopLayout() {
             )}
           </div>
         </div>
-        <div className="mx-auto w-11/12 py-4 flex items-center border-b-[1px] gap-8   bg-white ">
+        <div className="mx-auto w-11/12 py-4 flex items-center  gap-8   bg-white ">
           <Link to="/" className="">
             <img
               src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
@@ -96,46 +97,7 @@ export default function ShopLayout() {
         </div>
       </header>
       <Outlet />
-      <footer className="w-11/12 mx-auto py-12 pt-20 space-y-10">
-        <div className="w-full flex items-start gap-12 justify-between">
-          <div className="flex flex-col">
-            <p className="font-medium mb-3">Company</p>
-            <ul className="space-y-2">
-              <li>About</li>
-              <li>Blog</li>
-              <li>Jobs</li>
-              <li>Partners</li>
-            </ul>
-          </div>
-          <div className="flex flex-col">
-            <p className="font-medium mb-3">Company</p>
-            <ul className="space-y-2">
-              <li>About</li>
-              <li>Blog</li>
-              <li>Jobs</li>
-              <li>Partners</li>
-            </ul>
-          </div>
-          <div className="flex flex-col">
-            <p className="font-medium mb-3">Company</p>
-            <ul className="space-y-2">
-              <li>About</li>
-              <li>Blog</li>
-              <li>Jobs</li>
-              <li>Partners</li>
-            </ul>
-          </div>
-          <div className="flex flex-col">
-            <p className="font-medium mb-3">Legal</p>
-            <ul className="space-y-2">
-              <li>Claim</li>
-              <li>Privacy</li>
-              <li>Terms</li>
-            </ul>
-          </div>
-        </div>
-        <p>2020 Webly, Inc. All rights reserved.</p>
-      </footer>
+      <Footer />
     </>
   );
 }

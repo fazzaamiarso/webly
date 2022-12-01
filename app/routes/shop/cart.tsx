@@ -18,7 +18,7 @@ export const loader = async ({ request }: LoaderArgs) => {
           Ticket: {
             select: {
               price: true,
-              Webinar: { select: { name: true, coverImg: true } },
+              Webinar: { select: { name: true, coverImg: true, id: true } },
             },
           },
         },
@@ -39,7 +39,6 @@ export const action = async ({ request }: ActionArgs) => {
   invariant(typeof quantity === "string", "quantity must be a string!");
   invariant(typeof savedUser?.userId === "string", "Illegal that user is not exist!");
 
-  console.log(quantity);
   if (Number(quantity) <= 1) {
     await prisma.cart.delete({
       where: { userId_ticketId: { ticketId, userId: savedUser.userId } },
@@ -68,7 +67,7 @@ export default function Cart() {
               return (
                 <li
                   key={c.id}
-                  className="w-full p-4 flex items-start gap-2 border-t-[1px] border-y-black last:border-b-[1px]"
+                  className="w-full p-4 flex items-start gap-5 border-t-[1px] border-gray-300 last:border-b-[1px]"
                 >
                   <div className="h-16 aspect-square rounded-sm overflow-hidden">
                     <img
@@ -80,11 +79,11 @@ export default function Cart() {
                   <div className="flex flex-col w-full">
                     <div className="flex">
                       <div>
-                        <h3>{c.Ticket.Webinar.name}</h3>
-                        <p>Webinar Host</p>
+                        <h3 className="font-semibold">{c.Ticket.Webinar.name}</h3>
+                        <p className="">Webinar Host</p>
                       </div>
                       <div className="ml-auto space-x-4">
-                        <span className="text-sm">{c.quantity} x </span>
+                        <span className="">{c.quantity} x </span>
                         <span className="font-semibold">
                           {c.Ticket.price === 0 ? "Free" : `$${c.Ticket.price}`}
                         </span>
@@ -104,7 +103,7 @@ export default function Cart() {
                         disabled={isBusy}
                         className="text-blue-500 text-sm"
                       >
-                        Remove
+                        remove
                       </button>
                     </Form>
                   </div>
@@ -113,7 +112,9 @@ export default function Cart() {
             })}
           </ul>
         ) : (
-          <p>Your cart are empty!</p>
+          <div className="w-full flex py-12 justify-center">
+            <p>Your cart is empty!</p>
+          </div>
         )}
         <div className="flex flex-col gap-8">
           <div className="w-full flex items-center">

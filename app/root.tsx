@@ -26,7 +26,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="overflow-x-hidden">
+      <body className="overflow-x-hidden text-primary font-roboto">
         <Outlet />
         <div id="overlay-root"></div>
         <ScrollRestoration />

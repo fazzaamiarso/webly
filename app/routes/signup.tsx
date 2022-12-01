@@ -26,10 +26,7 @@ export default function Signup() {
             </Link>
           </p>
         </div>
-        <Form
-          method="post"
-          className="space-y-6 ring-1 p-8 rounded-md ring-black w-full"
-        >
+        <Form method="post" className="space-y-6 ring-1 p-8 rounded-md ring-gray-300 w-full">
           <input type="text" hidden name="auth-type" defaultValue="signup" />
           <div className="">
             <label htmlFor="email">Email address</label>
@@ -37,7 +34,7 @@ export default function Signup() {
               type="text"
               id="email"
               name="email"
-              className="w-full block rounded-md"
+              className="w-full block rounded-md border-gray-400"
             />
           </div>
           <div className="">
@@ -46,12 +43,10 @@ export default function Signup() {
               type="password"
               id="password"
               name="password"
-              className="w-full block rounded-md"
+              className="w-full block rounded-md border-gray-400"
             />
           </div>
-          <button className="w-full bg-black text-white p-2 rounded-md">
-            Sign up
-          </button>
+          <button className="w-full bg-black text-white p-2 rounded-md">Sign up</button>
         </Form>
       </div>
     </main>
