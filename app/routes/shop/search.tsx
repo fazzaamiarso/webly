@@ -127,6 +127,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       foreignField: "webinarId",
       as: "tickets",
     }),
+    { $unwind: "$seller" },
     {
       $project: {
         name: 1,
@@ -205,6 +206,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     .aggregate(pipeline)
     .toArray();
 
+  console.log(results);
   const parsed = z.array(webinarSearchSchema).parse(results);
   return json(parsed);
 };
@@ -324,20 +326,26 @@ const FilterWrapper = ({ children, title, fieldName }: FilterWrapperProps) => {
 
   const paramValues = searchParams.getAll(fieldName);
   return (
-    <fieldset className={"border-b-[1px] py-4 text-sm"}>
-      <div className="w-full flex items-center justify-between">
-        <legend className="font-semibold">{title}</legend>
-        <button type="button" onClick={() => setIsOpen((prev) => !prev)}>
-          <ChevronDownIcon
-            className={isOpen ? "w-5 rotate-180 transition-all" : "w-5 transition-all"}
-          />
-        </button>
-      </div>
-      {!isOpen && (
-        <div className="text-sm mt-2">
-          {paramValues.length === 0 ? null : paramValues.map(capitalize).join(", ")}
-        </div>
-      )}
+    <fieldset className="border-b-[1px] text-sm">
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="flex w-full flex-col py-4 "
+      >
+        <span className="w-full flex items-center justify-between">
+          <span className="font-semibold">{title}</span>
+          <span>
+            <ChevronDownIcon
+              className={isOpen ? "w-5 rotate-180 transition-all" : "w-5 transition-all"}
+            />
+          </span>
+        </span>
+        {!isOpen && (
+          <span className="text-sm pt-2" aria-hidden="true">
+            {paramValues.length === 0 ? null : paramValues.map(capitalize).join(", ")}
+          </span>
+        )}
+      </button>
       {isOpen && <Fragment>{children({ isOpen })}</Fragment>}
     </fieldset>
   );
