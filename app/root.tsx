@@ -1,21 +1,13 @@
 import type { MetaFunction } from "@remix-run/node";
-import {
-  Links,
-  LiveReload,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-} from "@remix-run/react";
+import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import styles from "./tailwind.css";
-
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: styles }];
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
-  title: "DEV x Atlas Hackathon",
+  title: "Webly",
   viewport: "width=device-width,initial-scale=1",
 });
 
@@ -26,7 +18,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="overflow-x-hidden text-primary font-roboto">
+      <body className="overflow-x-hidden font-roboto text-primary">
         <Outlet />
         <div id="overlay-root"></div>
         <ScrollRestoration />

@@ -65,25 +65,25 @@ export default function Cart() {
   const transition = useTransition();
   const isBusy = transition.state !== "idle";
   return (
-    <main className="w-11/12 max-w-2xl mx-auto py-12">
+    <main className="mx-auto w-11/12 max-w-2xl py-12">
       <section className="w-full space-y-8">
-        <h2 className="font-bold mb-8 text-3xl">Ticket Cart</h2>
+        <h2 className="mb-8 text-3xl font-bold">Ticket Cart</h2>
         {cart && cart.length > 0 ? (
-          <ul className="flex items-center  flex-wrap w-full">
+          <ul className="flex w-full  flex-wrap items-center">
             {cart.map((c) => {
               return (
                 <li
                   key={c.id}
-                  className="w-full p-4 flex items-start gap-5 border-t-[1px] border-gray-300 last:border-b-[1px]"
+                  className="flex w-full items-start gap-5 border-t-[1px] border-gray-300 p-4 last:border-b-[1px]"
                 >
-                  <div className="h-16 aspect-square rounded-sm overflow-hidden">
+                  <div className="aspect-square h-16 overflow-hidden rounded-sm">
                     <img
                       src={c.Ticket.Webinar.coverImg}
                       alt=""
-                      className="object-cover object-center h-full"
+                      className="h-full object-cover object-center"
                     />
                   </div>
-                  <div className="flex flex-col w-full">
+                  <div className="flex w-full flex-col">
                     <div className="flex">
                       <div>
                         <h3 className="font-semibold">{c.Ticket.Webinar.name}</h3>
@@ -108,7 +108,7 @@ export default function Cart() {
                         name="ticket-id"
                         value={c.ticketId}
                         disabled={isBusy}
-                        className="text-blue-500 text-sm"
+                        className="text-sm text-blue-500"
                       >
                         remove
                       </button>
@@ -119,21 +119,21 @@ export default function Cart() {
             })}
           </ul>
         ) : (
-          <div className="w-full flex py-12 justify-center">
+          <div className="flex w-full justify-center py-12">
             <p>Your cart is empty!</p>
           </div>
         )}
         <div className="flex flex-col gap-8">
-          <div className="w-full flex items-center">
+          <div className="flex w-full items-center">
             <p className="text-lg">Subtotal</p>
             <div className="ml-auto text-lg">
               ${cart.reduce((acc, curr) => acc + curr.quantity * curr.Ticket.price, 0)}
             </div>
           </div>
-          <button className="w-full bg-black text-white p-2 rounded-md">Checkout</button>
+          <button className="w-full rounded-md bg-black p-2 text-white">Checkout</button>
           <p className="text-center">
             or{" "}
-            <Link to="/shop" className="text-blue-500 text-sm">
+            <Link to="/shop" className="text-sm text-blue-500">
               Continue Browsing →
             </Link>
           </p>

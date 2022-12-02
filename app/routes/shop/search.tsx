@@ -200,7 +200,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   if (Object.keys(compound).length === 0) pipeline.shift();
 
   const collection = searchIntent === "webinar" ? "Webinar" : "Seller";
-  const results = await(await mongoClient)
+  const results = await (await mongoClient)
     .db("webinar-app")
     .collection(collection)
     .aggregate(pipeline)
@@ -216,12 +216,12 @@ export default function Search() {
   const [searchParams] = useSearchParams();
 
   return (
-    <main className="w-11/12 mx-auto">
-      <div className="w-full flex items-start py-8 gap-12">
+    <main className="mx-auto w-11/12">
+      <div className="flex w-full items-start gap-12 py-8">
         {/* FILTER */}
         <section className="basis-[20%]">
           <Form className="w-full" onChange={(e) => submit(e.currentTarget)}>
-            <h2 className="font-semibold text-lg mb-6">Filters</h2>
+            <h2 className="mb-6 text-lg font-semibold">Filters</h2>
             <input type="text" hidden defaultValue={searchParams.get("q") ?? ""} name="q" />
             <input
               type="text"
@@ -272,13 +272,13 @@ export default function Search() {
         <section className="basis-full">
           <div className="flex w-full justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="font-semibold text-lg">Webinars</h2>
+              <h2 className="text-lg font-semibold">Webinars</h2>
               <p className="text-sm">{webinars.length} results</p>
             </div>
             <select
               value={searchParams.get("sort") ?? "MOST_RELEVANT"}
               name="sort"
-              className="text-sm border-none font-semibold"
+              className="border-none text-sm font-semibold"
               onChange={(e) => {
                 searchParams.delete("sort");
                 searchParams.append("sort", e.target.value);
@@ -294,7 +294,7 @@ export default function Search() {
               })}
             </select>
           </div>
-          <ul className="w-full pt-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-6 gap-y-8">
+          <ul className="grid w-full grid-cols-2 gap-6 gap-y-8 pt-4  lg:grid-cols-3 xl:grid-cols-4">
             {webinars.map((w) => (
               <WebinarItem
                 key={w._id.toString()}
@@ -331,7 +331,7 @@ const FilterWrapper = ({ children, title, fieldName }: FilterWrapperProps) => {
         onClick={() => setIsOpen((prev) => !prev)}
         className="flex w-full flex-col py-4 "
       >
-        <span className="w-full flex items-center justify-between">
+        <span className="flex w-full items-center justify-between">
           <span className="font-semibold">{title}</span>
           <span>
             <ChevronDownIcon
@@ -344,7 +344,7 @@ const FilterWrapper = ({ children, title, fieldName }: FilterWrapperProps) => {
           </span>
         </span>
         {!isOpen && (
-          <span className="text-sm pt-2" aria-hidden="true">
+          <span className="pt-2 text-sm" aria-hidden="true">
             {paramValues.length === 0 ? null : paramValues.map(capitalize).join(", ")}
           </span>
         )}

@@ -15,10 +15,10 @@ export const action = async ({ request }: ActionArgs) => {
 
 export default function Signup() {
   return (
-    <main className="w-screen min-h-screen flex items-center justify-center">
-      <div className="max-w-md w-full mx-auto rounded-md  space-y-8">
+    <main className="flex min-h-screen w-screen items-center justify-center">
+      <div className="mx-auto w-full max-w-md space-y-8  rounded-md">
         <div className="text-center">
-          <h2 className="font-bold text-4xl">Sign up to Webly</h2>
+          <h2 className="text-4xl font-bold">Sign up to Webly</h2>
           <p>
             or{" "}
             <Link to="/signin" className="text-blue-500">
@@ -26,7 +26,7 @@ export default function Signup() {
             </Link>
           </p>
         </div>
-        <Form method="post" className="space-y-6 ring-1 p-8 rounded-md ring-gray-300 w-full">
+        <Form method="post" className="w-full space-y-6 rounded-md p-8 ring-1 ring-gray-300">
           <input type="text" hidden name="auth-type" defaultValue="signup" />
           <div className="">
             <label htmlFor="email">Email address</label>
@@ -34,7 +34,7 @@ export default function Signup() {
               type="text"
               id="email"
               name="email"
-              className="w-full block rounded-md border-gray-400"
+              className="block w-full rounded-md border-gray-400"
             />
           </div>
           <div className="">
@@ -43,10 +43,10 @@ export default function Signup() {
               type="password"
               id="password"
               name="password"
-              className="w-full block rounded-md border-gray-400"
+              className="block w-full rounded-md border-gray-400"
             />
           </div>
-          <button className="w-full bg-black text-white p-2 rounded-md">Sign up</button>
+          <button className="w-full rounded-md bg-black p-2 text-white">Sign up</button>
         </Form>
       </div>
     </main>

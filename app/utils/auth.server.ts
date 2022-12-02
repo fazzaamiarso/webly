@@ -20,10 +20,7 @@ authenticator.use(
     invariant(typeof email === "string", "Email must be string!");
     invariant(typeof password === "string", "Password can't be empty!");
     invariant(typeof authType === "string", "auth-type can't be empty!");
-    invariant(
-      authType === "signin" || authType === "signup",
-      "auth-type can't be empty!"
-    );
+    invariant(authType === "signin" || authType === "signup", "auth-type can't be empty!");
 
     let user: {
       userId: string;

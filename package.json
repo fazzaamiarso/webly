@@ -1,4 +1,6 @@
 {
+  "author": "Fazza Razaq Amiarso <fazzaamiarso@gmail.com> (https://fazzaamiarso.me/)",
+  "license": "MIT",
   "private": true,
   "sideEffects": false,
   "scripts": {
@@ -10,7 +12,10 @@
     "dev:remix": "remix dev",
     "generate:css": "npx tailwindcss -i ./styles/tailwind.css -o ./app/tailwind.css",
     "db:push": "prisma db push",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "check": "tsc --noEmit",
+    "lint": "eslint app/",
+    "format": "prettier --write app/"
   },
   "prisma": {
     "seed": "node --require esbuild-register prisma/seed.ts"

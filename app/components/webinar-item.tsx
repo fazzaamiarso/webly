@@ -10,37 +10,30 @@ type WebinarItemsProps = {
   tickets: { price: number }[];
 };
 
-export const WebinarItem = ({
-  id,
-  cover,
-  name,
-  tickets,
-  startDate,
-  seller,
-}: WebinarItemsProps) => {
+export const WebinarItem = ({ id, cover, name, tickets, startDate, seller }: WebinarItemsProps) => {
   const priceText =
     tickets?.length > 1
       ? `from ${tickets[0].price === 0 ? "free" : `$${tickets[0].price}`}`
       : `${tickets[0].price === 0 ? "Free" : `$${tickets[0].price}`}`;
   return (
     <li key={id} className="w-full">
-      <Link to={`/shop/webinar/${id}`} className="space-y-2 block w-full">
-        <div className="h-32 sm:h-40 w-full overflow-hidden rounded-md">
+      <Link to={`/shop/webinar/${id}`} className="block w-full space-y-2">
+        <div className="h-32 w-full overflow-hidden rounded-md sm:h-40">
           <img
             src={cover}
             alt=""
-            className="bg-cover bg-center bg-no-repeat hover:scale-110 transition-all duration-500"
+            className="bg-cover bg-center bg-no-repeat transition-all duration-500 hover:scale-110"
           />
         </div>
         <div className="flex w-full justify-between">
           <div className="mb-4">
-            <p className="font-semibold text-sm md:text-base line-clamp-1">{name}</p>
+            <p className="text-sm font-semibold line-clamp-1 md:text-base">{name}</p>
             <p className="text-sm text-gray-600">{seller}</p>
           </div>
         </div>
-        <div className="w-full flex">
-          <div className="text-sm md:text-base font-medium">{priceText}</div>
-          <div className="text-sm ml-auto">{dayjs(startDate).format("D MMM")}</div>
+        <div className="flex w-full">
+          <div className="text-sm font-medium md:text-base">{priceText}</div>
+          <div className="ml-auto text-sm">{dayjs(startDate).format("D MMM")}</div>
         </div>
       </Link>
     </li>

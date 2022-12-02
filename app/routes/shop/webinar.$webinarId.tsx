@@ -49,13 +49,13 @@ export default function WebinarDetails() {
   const { webinar, cart } = useLoaderData<typeof loader>();
 
   return (
-    <main className="w-11/12 mx-auto space-y-12 md:space-y-0 md:grid md:grid-cols-2 md:gap-8 pt-8">
+    <main className="mx-auto w-11/12 space-y-12 pt-8 md:grid md:grid-cols-2 md:gap-8 md:space-y-0">
       <section className="space-y-10">
         <div>
-          <h2 className="font-bold mb-2 text-3xl">{webinar?.name}</h2>
+          <h2 className="mb-2 text-3xl font-bold">{webinar?.name}</h2>
           <p className="mb-4">{webinar?.description}</p>
           <p className="flex items-center gap-2">
-            <VideoCameraIcon className="h-5 aspect-square" /> Meeting via Zoom
+            <VideoCameraIcon className="aspect-square h-5" /> Meeting via Zoom
           </p>
         </div>
         <div>
@@ -64,9 +64,9 @@ export default function WebinarDetails() {
           </h3>
         </div>
         <div className="w-full">
-          <h3 className="text-lg font-semibold mb-2">Schedules</h3>
+          <h3 className="mb-2 text-lg font-semibold">Schedules</h3>
           {webinar && (
-            <div className="w-full grid grid-cols-2 items-center gap-6 mb-6">
+            <div className="mb-6 grid w-full grid-cols-2 items-center gap-6">
               <ScheduleItem title="Registration Open" dateString={webinar.registrationOpen} />
               <ScheduleItem title="Registration Closed" dateString={webinar.registrationClosed} />
               <ScheduleItem title="Start Date" dateString={webinar.startDate} />
@@ -106,29 +106,29 @@ const TicketSelect = ({
   const ticketPriceAscending = tickets.sort((a, b) => a.price - b.price);
 
   return (
-    <ul className="grid md:grid-cols-2 gap-x-4 items-start">
+    <ul className="grid items-start gap-x-4 md:grid-cols-2">
       {ticketPriceAscending.map((t) => {
         const ticketInCart = cart.find((c) => c.ticketId === t.id)?.quantity ?? 0;
         const canAddToCart = ticketInCart < t.stock;
         return (
           <li
             key={t.id}
-            className="p-4 rounded-md ring-1 ring-gray-400 w-full space-y-2 self-stretch cursor-pointer"
+            className="w-full cursor-pointer space-y-2 self-stretch rounded-md p-4 ring-1 ring-gray-400"
           >
             <fetcher.Form
               replace
               method="post"
-              className="flex flex-col justify-between h-full gap-6"
+              className="flex h-full flex-col justify-between gap-6"
             >
               <input type="text" hidden defaultValue={t.id} name="ticket-id" />
               <div>
                 <div className="font-semibold">{t.price === 0 ? "Free" : `$${t.price}`}</div>
-                <p className="text-sm pb-2">{t.description}</p>
+                <p className="pb-2 text-sm">{t.description}</p>
                 <div className="text-sm font-semibold">{t.stock} tickets left</div>
               </div>
               <button
                 className={clsx(
-                  "w-full bg-black text-white py-2 rounded-md",
+                  "w-full rounded-md bg-black py-2 text-white",
                   !canAddToCart && "opacity-50"
                 )}
                 disabled={!canAddToCart || isBusy}
