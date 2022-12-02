@@ -1,10 +1,10 @@
+import { Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Category, TicketType } from "@prisma/client";
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useLoaderData, useSearchParams, useSubmit } from "@remix-run/react";
 import type { ReactNode } from "react";
-import { Fragment } from "react";
 import { useId, useState } from "react";
 import { z } from "zod";
 import { WebinarItem } from "~/components/webinar-item";
@@ -24,8 +24,7 @@ const webinarSearchSchema = z.object({
 
 const sorter = [
   { name: "Most Relevant", value: "MOST_RELEVANT" },
-  { name: "Newest", value: "NEWEST" },
-  { name: "Trending", value: "TRENDING" },
+  { name: "Soonest", value: "SOONEST" },
 ] as const;
 type SorterValues = typeof sorter[number]["value"];
 
@@ -189,10 +188,11 @@ export const loader = async ({ request }: LoaderArgs) => {
     );
   }
 
-  if (sort === "NEWEST") {
+  if (sort === "SOONEST") {
     pipeline.push({ $sort: { startDate: 1 } });
   }
 
+  // remove empty search compound fields causing errror
   const compound = pipeline[0].$search.compound;
   for (let key in compound) {
     if (compound[key].length === 0) delete compound[key];
@@ -200,7 +200,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   if (Object.keys(compound).length === 0) pipeline.shift();
 
   const collection = searchIntent === "webinar" ? "Webinar" : "Seller";
-  const results = await (await mongoClient)
+  const results = await(await mongoClient)
     .db("webinar-app")
     .collection(collection)
     .aggregate(pipeline)
@@ -335,7 +335,11 @@ const FilterWrapper = ({ children, title, fieldName }: FilterWrapperProps) => {
           <span className="font-semibold">{title}</span>
           <span>
             <ChevronDownIcon
-              className={isOpen ? "w-5 rotate-180 transition-all" : "w-5 transition-all"}
+              className={
+                isOpen
+                  ? "w-5 rotate-180 transition-all duration-300"
+                  : "w-5 transition-all duration-300"
+              }
             />
           </span>
         </span>
@@ -345,7 +349,17 @@ const FilterWrapper = ({ children, title, fieldName }: FilterWrapperProps) => {
           </span>
         )}
       </button>
-      {isOpen && <Fragment>{children({ isOpen })}</Fragment>}
+      <Transition
+        show={isOpen}
+        enterFrom="scale-y-0 opacity-0"
+        enter="duration-200 origin-top"
+        enterTo="scale-y-100 opacity-100"
+        leave="duration-200 origin-top"
+        leaveTo="scale-y-0 opacity-0"
+        leaveFrom="scale-y-100 opacity-100"
+      >
+        {children({ isOpen })}
+      </Transition>
     </fieldset>
   );
 };

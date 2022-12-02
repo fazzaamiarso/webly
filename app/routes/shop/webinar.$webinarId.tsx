@@ -128,7 +128,7 @@ const TicketSelect = ({
               </div>
               <button
                 className={clsx(
-                  "w-full bg-black text-white py-2 rounded-md disabled:cursor-not-allowed",
+                  "w-full bg-black text-white py-2 rounded-md",
                   !canAddToCart && "opacity-50"
                 )}
                 disabled={!canAddToCart || isBusy}

@@ -1,8 +1,5 @@
 import { Combobox } from "@headlessui/react";
-import {
-  MagnifyingGlassIcon,
-  ShoppingBagIcon,
-} from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, ShoppingBagIcon } from "@heroicons/react/24/outline";
 import { ChevronRightIcon, UserIcon } from "@heroicons/react/24/solid";
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
@@ -49,31 +46,31 @@ export default function ShopLayout() {
 
   return (
     <>
-      <header className="w-full border-b-[2px] border-gray-200 mb-4 relative z-10 bg-white">
+      <header className="relative z-10 mb-4 w-full border-b-[2px] border-gray-200 bg-white">
         <div className="bg-primary py-2">
-          <div className="w-11/12 mx-auto flex items-center">
+          <div className="mx-auto flex w-11/12 items-center">
             {user.email ? (
-              <div className="ml-auto space-x-8 flex items-center">
-                <p className="text-white text-sm flex items-center gap-2">
+              <div className="ml-auto flex items-center space-x-8">
+                <p className="flex items-center gap-2 text-sm text-white">
                   <UserIcon className="h-3" /> <span>{user.email}</span>
                 </p>
                 <Form action="/api/logout" method="post">
-                  <button className="text-white text-sm">Logout</button>
+                  <button className="text-sm text-white">Logout</button>
                 </Form>
               </div>
             ) : (
               <div className="ml-auto space-x-6">
-                <Link to="/signin" className="text-white text-sm ">
+                <Link to="/signin" className="text-sm text-white ">
                   Sign in
                 </Link>
-                <Link to="/signup" className="text-white text-sm">
+                <Link to="/signup" className="text-sm text-white">
                   Create an account
                 </Link>
               </div>
             )}
           </div>
         </div>
-        <div className="mx-auto w-11/12 py-4 flex items-center  gap-8   bg-white ">
+        <div className="mx-auto flex w-11/12 items-center gap-8  bg-white   py-4 ">
           <Link to="/" className="">
             <img
               src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
@@ -121,6 +118,7 @@ const SearchAutocomplete = () => {
     searchParams.append("q", value.name);
     searchParams.append("intent", value.type);
 
+    setQuery(value.name);
     submit(searchParams, {
       action: searchPath,
     });
@@ -134,21 +132,23 @@ const SearchAutocomplete = () => {
   };
 
   return (
-    <Form action={searchPath} method="get" className="w-full flex gap-2 relative max-w-lg">
-      <Combobox nullable as="div" className="w-full relative" onChange={onSelect}>
+    <Form action={searchPath} method="get" className="relative flex w-full max-w-lg gap-2">
+      <Combobox nullable as="div" className="relative w-full" onChange={onSelect}>
         {({ open }) => {
           return (
             <>
               {open && <Overlay />}
               <Combobox.Input
                 name="q"
+                value={query}
+                displayValue={() => query}
                 placeholder="Search webinars and hosts"
                 autoComplete="off"
-                className="w-full relative bg-[#f3f3f6] border-none py-3 rounded-sm focus-within:ring-2"
+                className="relative w-full rounded-sm border-none bg-[#f3f3f6] py-3 focus-within:ring-2"
                 onChange={onInputChange}
               />
 
-              <Combobox.Options className="absolute bottom-0 left-0 w-full z-50 rounded-md translate-y-[105%] bg-white shadow-lg p-4 space-y-2">
+              <Combobox.Options className="absolute bottom-0 left-0 z-50 w-full translate-y-[105%] space-y-2 rounded-md bg-white p-4 shadow-lg">
                 {webinars.map((w) => {
                   return (
                     <Combobox.Option
@@ -156,24 +156,24 @@ const SearchAutocomplete = () => {
                       value={w}
                       className={({ active }) => clsx("rounded-sm p-2", active && "bg-[#f3f3f6]")}
                     >
-                      {w.name}{" "}
-                      <span className="text-sm ml-2">
-                        in {w.type === "webinar" ? "Webinar" : "Seller"}
+                      <span className="text-sm font-semibold">{w.name}</span>{" "}
+                      <span className="ml-2 text-sm text-gray-600">
+                        in {w.type === "webinar" ? "webinar" : "seller"}
                       </span>
                     </Combobox.Option>
                   );
                 })}
                 <Combobox.Option
-                  value={query}
+                  value={{ name: query, type: "webinar" }}
                   className={({ active }) =>
                     clsx(
-                      "rounded-sm p-2 flex items-center justify-between",
+                      "flex items-center justify-between rounded-sm p-2",
                       active && "bg-[#f3f3f6]"
                     )
                   }
                 >
-                  <span>Show results for '{query}'</span>
-                  <ChevronRightIcon className="h-5 aspect-square" aria-hidden="true" />
+                  <span className="text-sm">Show results for '{query}'</span>
+                  <ChevronRightIcon className="aspect-square h-5" aria-hidden="true" />
                 </Combobox.Option>
               </Combobox.Options>
             </>
@@ -181,7 +181,7 @@ const SearchAutocomplete = () => {
         }}
       </Combobox>
       {showSpinner ? (
-        <div className="absolute z-10 right-0 px-4 bottom-0 -translate-y-1/2">
+        <div className="absolute right-0 bottom-0 z-10 -translate-y-1/2 px-4">
           <svg
             width="24"
             height="24"
@@ -207,7 +207,7 @@ const SearchAutocomplete = () => {
       ) : (
         <button
           type="submit"
-          className="flex items-center absolute z-10 right-0 px-4 bottom-0 -translate-y-1/2 "
+          className="absolute right-2 top-1/2 z-10 flex -translate-y-1/2 items-center rounded-full p-2 ring-2 ring-transparent transition-all  hover:bg-gray-300  active:ring-purple-400"
         >
           <MagnifyingGlassIcon className="h-6 w-6 " aria-hidden="true" />
         </button>
@@ -221,7 +221,7 @@ const Overlay = () => {
   if (!portalRoot) return null;
 
   return createPortal(
-    <div className="fixed left-0 inset-0 top-0 bg-gray-700 bg-opacity-75" />,
+    <div className="fixed inset-0 left-0 top-0 bg-gray-700 bg-opacity-75" />,
     portalRoot
   );
 };
