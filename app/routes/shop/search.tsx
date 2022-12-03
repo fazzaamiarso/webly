@@ -46,9 +46,10 @@ export const loader = async ({ request }: LoaderArgs) => {
   const searchParams = new URL(request.url).searchParams;
   const query = searchParams.get("q");
   const pricingType = searchParams.getAll("price");
-  const sort: SorterValues = (searchParams.get("sort") ?? "MOST_RELEVANT") as SorterValues;
+  const sort = (searchParams.get("sort") ?? "MOST_RELEVANT") as SorterValues;
   const categories = searchParams.getAll("category");
   const searchIntent = searchParams.get("intent") ?? "webinar";
+  const pageNum = searchParams.get("page-number") ? Number(searchParams.get("page-number")) : 1;
 
   const priceFilter = pricingType.length
     ? pricingType.length === 2
@@ -200,19 +201,29 @@ export const loader = async ({ request }: LoaderArgs) => {
   if (Object.keys(compound).length === 0) pipeline.shift();
 
   const collection = searchIntent === "webinar" ? "Webinar" : "Seller";
-  const results = await (await mongoClient)
+
+  const ITEM_PER_PAGE = 12;
+  const aggregation = await(await mongoClient)
     .db("webinar-app")
     .collection(collection)
     .aggregate(pipeline)
+    .skip((pageNum - 1) * ITEM_PER_PAGE)
+    .limit(ITEM_PER_PAGE + 1)
     .toArray();
 
-  const parsed = z.array(webinarSearchSchema).parse(results);
-  return json(parsed);
+  const result = aggregation.slice(0, ITEM_PER_PAGE);
+  const hasNext = aggregation.at(ITEM_PER_PAGE)?._id !== undefined;
+  const parsed = z.array(webinarSearchSchema).parse(result);
+  return json({
+    webinars: parsed,
+    pageNum,
+    hasNext,
+  });
 };
 
 export default function Search() {
   const submit = useSubmit();
-  const webinars = useLoaderData<typeof loader>();
+  const { webinars, pageNum, hasNext } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
 
   return (
@@ -220,7 +231,7 @@ export default function Search() {
       <div className="flex w-full items-start gap-12 py-8">
         {/* FILTER */}
         <section className="basis-[20%]">
-          <Form className="w-full" onChange={(e) => submit(e.currentTarget)}>
+          <Form id="shop-search" className="w-full" onChange={(e) => submit(e.currentTarget)}>
             <h2 className="mb-6 text-lg font-semibold">Filters</h2>
             <input type="text" hidden defaultValue={searchParams.get("q") ?? ""} name="q" />
             <input
@@ -273,9 +284,9 @@ export default function Search() {
           <div className="flex w-full justify-between">
             <div className="flex items-center gap-3">
               <h2 className="text-lg font-semibold">Webinars</h2>
-              <p className="text-sm">{webinars.length} results</p>
             </div>
             <select
+              form="shop-search"
               value={searchParams.get("sort") ?? "MOST_RELEVANT"}
               name="sort"
               className="border-none text-sm font-semibold"
@@ -307,6 +318,27 @@ export default function Search() {
               />
             ))}
           </ul>
+          <div className="mt-12 flex w-full items-center justify-center gap-8">
+            <button
+              form="shop-search"
+              name="page-number"
+              value={pageNum - 1}
+              disabled={pageNum - 1 < 1}
+              className="rounded-sm p-1 text-sm ring-1 ring-gray-500 disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <div className="text-sm">Page {pageNum}</div>
+            <button
+              form="shop-search"
+              name="page-number"
+              value={pageNum + 1}
+              disabled={!hasNext}
+              className=" rounded-sm p-1 text-sm ring-1 ring-gray-500 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </section>
         {/* PRODUCTS END */}
       </div>

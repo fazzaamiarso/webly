@@ -35,6 +35,7 @@ export default function Signin() {
               id="email"
               name="email"
               className="block w-full rounded-md border-gray-400"
+              autoComplete="off"
             />
           </div>
           <div className="">

@@ -10,7 +10,7 @@ import { prisma } from "~/lib/prisma.server";
 import { authenticator } from "~/utils/auth.server";
 
 export const loader = async ({ request, params }: LoaderArgs) => {
-  const user = await authenticator.isAuthenticated(request);
+  const user = await authenticator.isAuthenticated(request, { failureRedirect: "/signin" });
 
   invariant(params.webinarId, `Expected ${params.webinarId}!`);
   invariant(typeof user?.userId === "string", "Illegal Action, must have a user!");
