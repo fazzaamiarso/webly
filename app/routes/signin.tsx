@@ -1,6 +1,8 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
-import { Form, Link } from "@remix-run/react";
-import { authenticator } from "~/utils/auth.server";
+import { json } from "@remix-run/node";
+import { Form, Link, useActionData } from "@remix-run/react";
+import { authenticator, findUser, validateUser } from "~/utils/auth.server";
+import { validateEmail, validatePassword } from "~/utils/validation.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
   await authenticator.isAuthenticated(request, { successRedirect: "/shop" });
@@ -8,12 +10,28 @@ export const loader = async ({ request }: LoaderArgs) => {
 };
 
 export const action = async ({ request }: ActionArgs) => {
+  const form = await request.clone().formData();
+  const email = form.get("email") as string;
+  const password = form.get("password") as string;
+
+  const emailError = validateEmail(email);
+  const passwordError = validatePassword(password);
+  if (emailError || passwordError)
+    return json({ errors: { email: emailError, password: passwordError } });
+
+  const registeredUser = await findUser(email);
+  if (!registeredUser) return json({ errors: { email: "User not found!", password: undefined } });
+
+  const validationError = await validateUser(registeredUser.id, password);
+  if (validationError) return json({ errors: { email: undefined, password: validationError } });
+
   return await authenticator.authenticate("user-pass", request, {
     successRedirect: "/",
   });
 };
 
 export default function Signin() {
+  const actionData = useActionData();
   return (
     <main className="flex min-h-screen w-screen items-center justify-center">
       <div className="mx-auto w-full max-w-md space-y-8  rounded-md">
@@ -37,7 +55,10 @@ export default function Signin() {
               className="block w-full rounded-md border-gray-400"
               autoComplete="off"
             />
-          </div>
+          </div>{" "}
+          {actionData?.errors.email && (
+            <p className="text-sm text-red-500">{actionData?.errors.email}</p>
+          )}
           <div className="">
             <label htmlFor="password">Password</label>
             <input
@@ -46,6 +67,9 @@ export default function Signin() {
               name="password"
               className="block w-full rounded-md border-gray-400"
             />
+            {actionData?.errors?.password && (
+              <p className="text-sm text-red-500">{actionData?.errors?.password}</p>
+            )}
           </div>
           <div className="flex w-full justify-between">
             <div className="flex items-center gap-2">

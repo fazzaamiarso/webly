@@ -6,7 +6,7 @@ import { prisma } from "~/lib/prisma.server";
 import { authenticator } from "~/utils/auth.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const savedUser = await authenticator.isAuthenticated(request);
+  const savedUser = await authenticator.isAuthenticated(request, { failureRedirect: "/signin" });
   const user = await prisma.user.findUnique({
     where: { id: savedUser?.userId },
     select: {

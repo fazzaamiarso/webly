@@ -28,8 +28,6 @@ authenticator.use(
     } = { email: "", userId: "" };
 
     if (authType === "signup") {
-      const isUserExist = await findUser(email);
-      if (isUserExist) throw json({ message: "user already exist!" }, 400);
       const newUser = await createUser(email, password);
       user = { email: newUser.email, userId: newUser.id };
     }
@@ -37,14 +35,6 @@ authenticator.use(
     if (authType === "signin") {
       const foundUser = await findUser(email);
       if (!foundUser) throw json({ message: "User not found!" }, 404);
-
-      const hashedPassword = await prisma.password.findUnique({
-        where: { userId: foundUser?.id },
-        select: { hash: true },
-      });
-
-      const isValid = bcrypt.compare(hashedPassword?.hash ?? "", password);
-      if (!isValid) throw json({ message: "Unauthorized!" }, 401);
 
       user = { email: foundUser.email, userId: foundUser.id };
     }
@@ -72,4 +62,14 @@ export const createUser = async (email: string, password: string) => {
     },
   });
   return user;
+};
+
+export const validateUser = async (id: string, password: string) => {
+  const hashedPassword = await prisma.password.findUnique({
+    where: { userId: id },
+    select: { hash: true },
+  });
+
+  const isValid = bcrypt.compare(hashedPassword?.hash ?? "", password);
+  if (!isValid) return "Wrong password!";
 };
