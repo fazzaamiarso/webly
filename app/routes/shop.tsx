@@ -71,13 +71,12 @@ export default function ShopLayout() {
           </div>
         </div>
         <div className="mx-auto flex w-11/12 items-center gap-8  bg-white   py-4 ">
-          <Link to="/" className="">
-            <img
-              src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-              alt=""
-              className="h-8 w-auto"
-            />
-          </Link>
+          <h1>
+            <Link to="/" className="text-4xl font-bold">
+              Webly
+            </Link>
+          </h1>
+
           <SearchAutocomplete />
           <div className="ml-auto flex items-center gap-6">
             <Link to="/shop/cart" className="flex items-center ">
@@ -133,6 +132,12 @@ const SearchAutocomplete = () => {
 
   return (
     <Form action={searchPath} method="get" className="relative flex w-full max-w-lg gap-2">
+      <input
+        type="text"
+        hidden
+        name="intent"
+        defaultValue={searchParams.get("intent") ?? "webinar"}
+      />
       <Combobox nullable as="div" className="relative w-full" onChange={onSelect}>
         {({ open }) => {
           return (
