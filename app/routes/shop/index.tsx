@@ -19,7 +19,7 @@ export default function Index() {
 
   return (
     <main className="mx-auto w-11/12 space-y-12">
-      <section className="h-80 w-full bg-gradient-to-bl from-green-300 via-yellow-300 to-pink-300"></section>
+      <section className="h-80 w-full bg-gradient-to-tr from-pink-500 via-red-500 to-yellow-500"></section>
       <section className="w-full">
         <h2 className="mb-8 text-lg font-bold">Featured Webinars</h2>
         <ul className="grid w-full grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5">

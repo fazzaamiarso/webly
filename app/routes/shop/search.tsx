@@ -43,6 +43,8 @@ const searchOperator = (operator: "text" | "regex" | "wildcard", option: Record<
   return { [operator]: option };
 };
 export const loader = async ({ request }: LoaderArgs) => {
+  const mongoConnection = await mongoClient;
+
   const searchParams = new URL(request.url).searchParams;
   const query = searchParams.get("q");
   const pricingType = searchParams.getAll("price");
@@ -203,13 +205,15 @@ export const loader = async ({ request }: LoaderArgs) => {
   const collection = searchIntent === "webinar" ? "Webinar" : "Seller";
 
   const ITEM_PER_PAGE = 12;
-  const aggregation = await(await mongoClient)
+  const aggregation = await mongoConnection
     .db("webinar-app")
     .collection(collection)
     .aggregate(pipeline)
     .skip((pageNum - 1) * ITEM_PER_PAGE)
     .limit(ITEM_PER_PAGE + 1)
     .toArray();
+
+  console.log(aggregation);
 
   const result = aggregation.slice(0, ITEM_PER_PAGE);
   const hasNext = aggregation.at(ITEM_PER_PAGE)?._id !== undefined;
