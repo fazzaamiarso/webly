@@ -1,6 +1,6 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, Link, useActionData } from "@remix-run/react";
+import { Form, Link, useActionData, useTransition } from "@remix-run/react";
 import { authenticator, findUser } from "~/utils/auth.server";
 import { validateEmail, validatePassword } from "~/utils/validation.server";
 
@@ -29,7 +29,9 @@ export const action = async ({ request }: ActionArgs) => {
 };
 
 export default function Signup() {
+  const transition = useTransition();
   const actionData = useActionData();
+  const isBusy = transition.state !== "idle";
 
   return (
     <main className="flex min-h-screen w-screen items-center justify-center">
@@ -72,7 +74,10 @@ export default function Signup() {
               <p className="text-sm text-red-500">{actionData?.errors?.password}</p>
             )}
           </div>
-          <button className="w-full rounded-md bg-black p-2 text-white">Sign up</button>
+          <button className="w-full rounded-md bg-black p-2 text-white" disabled={isBusy}>
+            {" "}
+            {isBusy ? "Registering..." : "Sign up"}
+          </button>
         </Form>
       </div>
     </main>
