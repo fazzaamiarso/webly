@@ -111,10 +111,9 @@ const SearchAutocomplete = () => {
   const showSpinner = useSpinDelay(isBusy, { delay: 150, minDuration: 500 });
 
   const onSelect = (value: { name: string; type: string }) => {
-    if (!value) return;
     searchParams.delete("q");
     searchParams.delete("intent");
-    searchParams.append("q", value.name);
+    value.name && searchParams.append("q", value.name);
     searchParams.append("intent", value.type);
 
     setQuery(value.name);
@@ -167,7 +166,19 @@ const SearchAutocomplete = () => {
                   );
                 })}
                 <Combobox.Option
-                  value={{ name: query, type: "webinar" }}
+                  value={{ name: null, type: "webinar" }}
+                  className={({ active }) =>
+                    clsx(
+                      "flex items-center justify-between rounded-sm p-2",
+                      active && "bg-[#f3f3f6]"
+                    )
+                  }
+                >
+                  <span className="text-sm">Search All</span>
+                  <ChevronRightIcon className="aspect-square h-5" aria-hidden="true" />
+                </Combobox.Option>
+                <Combobox.Option
+                  value={{ name: "", type: "webinar" }}
                   className={({ active }) =>
                     clsx(
                       "flex items-center justify-between rounded-sm p-2",
