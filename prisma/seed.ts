@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { Category, PrismaClient, TicketType } from "@prisma/client";
 import { faker } from "@faker-js/faker";
+import mockWebinars from "./data.json";
 
 const prisma = new PrismaClient();
 
@@ -8,6 +9,28 @@ const randomCategory = () =>
   faker.helpers.arrayElement(Object.values(Category));
 
 const randomType = () => faker.helpers.arrayElement(Object.values(TicketType));
+
+const webinarsFromMocks = async (name: string, host: string) => {
+  const regOpen = faker.date.future();
+  const regClosed = faker.date.future(undefined, regOpen);
+  const startDate = faker.date.future(undefined, regClosed);
+  const endDate = faker.date.future(undefined, startDate);
+
+  await prisma.webinar.create({
+    data: {
+      coverImg: faker.image.food(),
+      name,
+      description: faker.commerce.productDescription(),
+      type: randomType(),
+      endDate,
+      startDate,
+      registrationOpen: regOpen,
+      registrationClosed: regClosed,
+      category: randomCategory(),
+      seller: { connectOrCreate: { create: { name: host }, where: { name: host } } },
+    },
+  });
+};
 
 const fakeWebinars = () =>
   faker.datatype.array(3).map((_) => {
@@ -43,6 +66,11 @@ const runSeed = async () => {
   await prisma.ticket.deleteMany();
 
   console.log("🌱 Start Seeding!");
+
+  console.log("Creating Webinars from mocks!");
+  for (let w of mockWebinars) {
+    await webinarsFromMocks(w.name, w.host);
+  }
 
   console.log("Creating Sellers with Webinars!");
   for (let _ of Array.from({ length: 10 })) {

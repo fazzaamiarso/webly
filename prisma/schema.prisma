@@ -35,7 +35,7 @@ model Ticket {
   stock           Int     @default(1)
   description     String
   price           Int     @default(0)
-  discountPercent Float     @default(0)
+  discountPercent Float   @default(0)
   discountActive  Boolean @default(false)
   Webinar         Webinar @relation(fields: [webinarId], references: [id], onDelete: Cascade)
   webinarId       String  @db.ObjectId
@@ -44,7 +44,7 @@ model Ticket {
 
 model Seller {
   id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
+  name      String    @unique
   createdAt DateTime  @default(now())
   webinars  Webinar[]
 }
