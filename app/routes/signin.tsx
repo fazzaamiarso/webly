@@ -34,7 +34,6 @@ export default function Signin() {
   const transition = useTransition();
   const actionData = useActionData();
 
-  const isBusy = transition.state !== "idle";
   return (
     <main className="flex min-h-screen w-screen items-center justify-center">
       <div className="mx-auto w-full max-w-md space-y-8  rounded-md">
@@ -92,9 +91,9 @@ export default function Signin() {
           </div>
           <button
             className="w-full rounded-md bg-black p-2 text-white opacity-90"
-            disabled={isBusy}
+            disabled={!!transition.submission}
           >
-            {isBusy ? "Signing in..." : "Sign in"}
+            {transition.submission ? "Signing in..." : "Sign in"}
           </button>
         </Form>
       </div>

@@ -102,7 +102,7 @@ const TicketSelect = ({
 }) => {
   const fetcher = useFetcher();
 
-  const isBusy = fetcher.state !== "idle";
+  const isBusy = fetcher.submission !== undefined;
   const ticketPriceAscending = tickets.sort((a, b) => a.price - b.price);
 
   return (
@@ -120,6 +120,7 @@ const TicketSelect = ({
               method="post"
               className="flex h-full flex-col justify-between gap-6"
             >
+              <input type="text" hidden defaultValue="add-cart" name="action" />
               <input type="text" hidden defaultValue={t.id} name="ticket-id" />
               <div>
                 <div className="font-semibold">{t.price === 0 ? "Free" : `$${t.price}`}</div>

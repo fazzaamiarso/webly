@@ -11,6 +11,7 @@ import {
   Outlet,
   useLoaderData,
   useSearchParams,
+  useFetchers,
 } from "@remix-run/react";
 import clsx from "clsx";
 import type { ChangeEvent } from "react";
@@ -42,7 +43,15 @@ export const loader = async ({ request }: LoaderArgs) => {
 };
 
 export default function ShopLayout() {
+  const fetchers = useFetchers();
   const user = useLoaderData<typeof loader>();
+
+  let cartCount = 0;
+  for (let f of fetchers) {
+    if (f.submission && user.cartItemsCount && f.submission.formData.get("action") === "add-cart") {
+      cartCount = user.cartItemsCount + 1;
+    }
+  }
 
   return (
     <>
@@ -85,7 +94,7 @@ export default function ShopLayout() {
                 aria-hidden="true"
               />
               <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                {user.cartItemsCount}
+                {cartCount > 0 ? cartCount : user.cartItemsCount}
               </span>
               <span className="sr-only">items in cart, view bag</span>
             </Link>
